@@ -1,7 +1,8 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Brain, Users, Mic, Briefcase, ArrowRight, Trophy } from "lucide-react";
-import { getUser } from "@/lib/auth";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -9,18 +10,20 @@ export const Route = createFileRoute("/")({
       { title: "Ace It Up — AI Placement Prep for Students" },
       { name: "description", content: "Crack campus placements with AI-powered aptitude, GD, communication, and interview practice." },
       { property: "og:title", content: "Ace It Up — AI Placement Prep" },
-      { property: "og:description", content: "Practice aptitude, GD, communication & interviews with instant AI feedback." },
+      { property: "og:description", content: "Practice with instant AI feedback. Track real progress." },
     ],
   }),
-  beforeLoad: () => {
-    if (typeof window !== "undefined" && getUser()) {
-      throw redirect({ to: "/dashboard" });
-    }
-  },
   component: Landing,
 });
 
 function Landing() {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && user) navigate({ to: "/dashboard" });
+  }, [user, loading, navigate]);
+
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-hero pointer-events-none" />
@@ -45,7 +48,7 @@ function Landing() {
           Land your dream job with <span className="text-gradient">Ace It Up</span>
         </h1>
         <p className="mt-5 text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-          Practice aptitude tests, group discussions, communication and mock interviews — with instant AI feedback that helps you improve every day.
+          Practice aptitude tests, group discussions, communication and mock interviews — with instant AI feedback that tracks your real progress every day.
         </p>
         <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
           <Link to="/register">
@@ -59,7 +62,7 @@ function Landing() {
         <div className="mt-20 grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
           {[
             { icon: Brain, title: "Aptitude", desc: "Timed MCQ tests with instant scoring." },
-            { icon: Users, title: "Group Discussion", desc: "Practice topics, get feedback." },
+            { icon: Users, title: "Group Discussion", desc: "Topics graded by AI feedback." },
             { icon: Mic, title: "Communication", desc: "Daily prompts to sharpen fluency." },
             { icon: Briefcase, title: "Interview", desc: "HR + technical mock Q&A." },
           ].map((f) => (
@@ -74,7 +77,7 @@ function Landing() {
         </div>
 
         <div className="mt-16 inline-flex items-center gap-2 text-sm text-muted-foreground">
-          <Trophy className="w-4 h-4 text-accent" /> Built for students serious about placements.
+          <Trophy className="w-4 h-4 text-accent" /> Real progress. Real AI feedback. Built for placements.
         </div>
       </section>
     </div>

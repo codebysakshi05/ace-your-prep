@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { addProgress } from "@/lib/progress";
+import { moduleService } from "@/services/moduleService";
+import { useAuth } from "@/lib/auth-context";
+import { toast } from "sonner";
 import { Brain, Clock, RotateCcw, Trophy } from "lucide-react";
 
 type Q = { q: string; opts: string[]; ans: number };
@@ -18,26 +20,25 @@ const QUESTIONS: Q[] = [
   { q: "A clock shows 3:15. The angle between hands is?", opts: ["0°", "7.5°", "15°", "30°"], ans: 1 },
 ];
 
-const TIME = 120; // seconds
+const TIME = 120;
 
 export function Aptitude() {
+  const { user } = useAuth();
   const [idx, setIdx] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const [time, setTime] = useState(TIME);
   const [done, setDone] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (done) return;
-    if (time <= 0) return finish();
+    if (time <= 0) { finish(); return; }
     const t = setTimeout(() => setTime((s) => s - 1), 1000);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [time, done]);
 
-  const score = useMemo(
-    () => answers.reduce((acc, a, i) => acc + (a === QUESTIONS[i].ans ? 1 : 0), 0),
-    [answers],
-  );
+  const score = useMemo(() => answers.reduce((acc, a, i) => acc + (a === QUESTIONS[i].ans ? 1 : 0), 0), [answers]);
 
   function pick(opt: number) {
     const next = [...answers, opt];
@@ -46,18 +47,28 @@ export function Aptitude() {
     else finish(next);
   }
 
-  function finish(final = answers) {
+  async function finish(final = answers) {
+    if (done || !user) { setDone(true); return; }
     const correct = final.reduce((acc, a, i) => acc + (a === QUESTIONS[i].ans ? 1 : 0), 0);
     const pct = Math.round((correct / QUESTIONS.length) * 100);
-    addProgress({ module: "aptitude", score: pct, detail: `${correct}/${QUESTIONS.length}` });
     setDone(true);
+    setSaving(true);
+    try {
+      await moduleService.saveAttempt({
+        userId: user.id,
+        module: "aptitude",
+        score: pct,
+        detail: `${correct}/${QUESTIONS.length} correct`,
+      });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not save attempt");
+    } finally {
+      setSaving(false);
+    }
   }
 
   function reset() {
-    setIdx(0);
-    setAnswers([]);
-    setTime(TIME);
-    setDone(false);
+    setIdx(0); setAnswers([]); setTime(TIME); setDone(false);
   }
 
   if (done) {
@@ -71,6 +82,7 @@ export function Aptitude() {
           <div className="text-center py-6">
             <p className="text-6xl font-extrabold text-gradient">{pct}%</p>
             <p className="text-muted-foreground mt-2">{score} / {QUESTIONS.length} correct</p>
+            <p className="text-xs text-muted-foreground mt-1">{saving ? "Saving…" : "Saved to your progress ✓"}</p>
           </div>
           <Button onClick={reset} className="w-full bg-gradient-primary border-0">
             <RotateCcw className="w-4 h-4 mr-2" /> Retake test
@@ -90,16 +102,12 @@ export function Aptitude() {
         </div>
       </CardHeader>
       <CardContent className="space-y-5">
-        <Progress value={((idx) / QUESTIONS.length) * 100} />
+        <Progress value={(idx / QUESTIONS.length) * 100} />
         <p className="text-xs text-muted-foreground">Question {idx + 1} of {QUESTIONS.length}</p>
         <h3 className="text-lg font-semibold leading-snug">{cur.q}</h3>
         <div className="grid gap-2">
           {cur.opts.map((o, i) => (
-            <button
-              key={i}
-              onClick={() => pick(i)}
-              className="text-left px-4 py-3 rounded-lg border border-border bg-secondary/40 hover:bg-secondary hover:border-accent transition-all"
-            >
+            <button key={i} onClick={() => pick(i)} className="text-left px-4 py-3 rounded-lg border border-border bg-secondary/40 hover:bg-secondary hover:border-accent transition-all">
               <span className="font-mono text-accent mr-2">{String.fromCharCode(65 + i)}.</span> {o}
             </button>
           ))}
