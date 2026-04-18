@@ -14,7 +14,102 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      attempts: {
+        Row: {
+          answer: string | null
+          created_at: string
+          detail: string | null
+          feedback: Json | null
+          id: string
+          module: Database["public"]["Enums"]["module_key"]
+          prompt: string | null
+          score: number
+          user_id: string
+        }
+        Insert: {
+          answer?: string | null
+          created_at?: string
+          detail?: string | null
+          feedback?: Json | null
+          id?: string
+          module: Database["public"]["Enums"]["module_key"]
+          prompt?: string | null
+          score: number
+          user_id: string
+        }
+        Update: {
+          answer?: string | null
+          created_at?: string
+          detail?: string | null
+          feedback?: Json | null
+          id?: string
+          module?: Database["public"]["Enums"]["module_key"]
+          prompt?: string | null
+          score?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      module_scores: {
+        Row: {
+          attempts_count: number
+          avg_score: number
+          best_score: number
+          id: string
+          last_attempt_at: string | null
+          module: Database["public"]["Enums"]["module_key"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempts_count?: number
+          avg_score?: number
+          best_score?: number
+          id?: string
+          last_attempt_at?: string | null
+          module: Database["public"]["Enums"]["module_key"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempts_count?: number
+          avg_score?: number
+          best_score?: number
+          id?: string
+          last_attempt_at?: string | null
+          module?: Database["public"]["Enums"]["module_key"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +118,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      module_key: "aptitude" | "gd" | "communication" | "interview"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +245,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      module_key: ["aptitude", "gd", "communication", "interview"],
+    },
   },
 } as const
