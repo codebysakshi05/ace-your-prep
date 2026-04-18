@@ -1,19 +1,32 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { LogOut, Menu, Sparkles } from "lucide-react";
-import { clearUser, getUser, type MockUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth-context";
+import { authService } from "@/services/authService";
+import { supabase } from "@/integrations/supabase/client";
 
 export function Navbar() {
-  const [user, setUser] = useState<MockUser | null>(null);
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const [name, setName] = useState<string>("");
 
   useEffect(() => {
-    setUser(getUser());
-    const sync = () => setUser(getUser());
-    window.addEventListener("aceitup-auth", sync);
-    return () => window.removeEventListener("aceitup-auth", sync);
-  }, []);
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("display_name")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        setName(data?.display_name ?? user.email?.split("@")[0] ?? "");
+      });
+  }, [user]);
+
+  async function logout() {
+    await authService.signOut();
+    navigate({ to: "/login" });
+  }
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background/80 backdrop-blur px-4 md:px-6">
@@ -24,34 +37,21 @@ export function Navbar() {
         <span className="font-bold">Ace It Up</span>
       </div>
       <div className="hidden md:block text-sm text-muted-foreground">
-        Welcome back{user ? `, ${user.name.split(" ")[0]}` : ""} 👋
+        Welcome back{name ? `, ${name.split(" ")[0]}` : ""} 👋
       </div>
       <div className="flex items-center gap-2">
-        {user ? (
+        {user && (
           <>
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary text-xs">
               <div className="w-6 h-6 rounded-full bg-gradient-primary grid place-items-center text-[10px] font-bold text-primary-foreground">
-                {user.name.slice(0, 1).toUpperCase()}
+                {(name || user.email || "U").slice(0, 1).toUpperCase()}
               </div>
-              {user.name}
+              {name || user.email}
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                clearUser();
-                navigate({ to: "/login" });
-              }}
-            >
+            <Button variant="ghost" size="sm" onClick={logout}>
               <LogOut className="w-4 h-4 mr-1" /> Logout
             </Button>
           </>
-        ) : (
-          <Link to="/login">
-            <Button size="sm" className="bg-gradient-primary text-primary-foreground border-0">
-              Sign in
-            </Button>
-          </Link>
         )}
         <button className="md:hidden p-2 rounded-md hover:bg-secondary" aria-label="Menu">
           <Menu className="w-5 h-5" />

@@ -1,10 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { setUser } from "@/lib/auth";
-import { AuthShell } from "./login";
+import { authService } from "@/services/authService";
+import { useAuth } from "@/lib/auth-context";
+import { AuthShell, Divider, OAuthButtons } from "./login";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/register")({
   head: () => ({ meta: [{ title: "Create account — Ace It Up" }] }),
@@ -12,20 +15,43 @@ export const Route = createFileRoute("/register")({
 });
 
 function Register() {
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  function submit(e: React.FormEvent) {
+  useEffect(() => {
+    if (!authLoading && user) navigate({ to: "/dashboard" });
+  }, [user, authLoading, navigate]);
+
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!name || !email || password.length < 6) {
-      setErr("Fill all fields. Password must be 6+ characters.");
-      return;
+      return toast.error("Fill all fields. Password must be 6+ characters.");
     }
-    setUser({ name, email });
-    navigate({ to: "/dashboard" });
+    setBusy(true);
+    try {
+      await authService.signUp(email, password, name);
+      toast.success("Account created — welcome to Ace It Up!");
+      navigate({ to: "/dashboard" });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Sign-up failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function oauth(provider: "google" | "apple") {
+    setBusy(true);
+    try {
+      if (provider === "google") await authService.signInWithGoogle();
+      else await authService.signInWithApple();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : `${provider} sign-in failed`);
+      setBusy(false);
+    }
   }
 
   return (
@@ -43,12 +69,17 @@ function Register() {
           <Label htmlFor="password">Password</Label>
           <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 6 characters" className="mt-1.5" />
         </div>
-        {err && <p className="text-sm text-destructive">{err}</p>}
-        <Button type="submit" className="w-full bg-gradient-primary border-0 shadow-glow">Create account</Button>
-        <p className="text-sm text-center text-muted-foreground">
-          Already a member? <Link to="/login" className="text-accent hover:underline">Sign in</Link>
-        </p>
+        <Button type="submit" disabled={busy} className="w-full bg-gradient-primary border-0 shadow-glow">
+          {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create account"}
+        </Button>
       </form>
+
+      <Divider />
+      <OAuthButtons onClick={oauth} disabled={busy} />
+
+      <p className="text-sm text-center text-muted-foreground mt-6">
+        Already a member? <Link to="/login" className="text-accent hover:underline">Sign in</Link>
+      </p>
     </AuthShell>
   );
 }
