@@ -19,33 +19,42 @@ export type Database = {
           answer: string | null
           created_at: string
           detail: string | null
+          difficulty: string | null
           feedback: Json | null
           id: string
           module: Database["public"]["Enums"]["module_key"]
           prompt: string | null
           score: number
+          time_spent_ms: number | null
+          topic: string | null
           user_id: string
         }
         Insert: {
           answer?: string | null
           created_at?: string
           detail?: string | null
+          difficulty?: string | null
           feedback?: Json | null
           id?: string
           module: Database["public"]["Enums"]["module_key"]
           prompt?: string | null
           score: number
+          time_spent_ms?: number | null
+          topic?: string | null
           user_id: string
         }
         Update: {
           answer?: string | null
           created_at?: string
           detail?: string | null
+          difficulty?: string | null
           feedback?: Json | null
           id?: string
           module?: Database["public"]["Enums"]["module_key"]
           prompt?: string | null
           score?: number
+          time_spent_ms?: number | null
+          topic?: string | null
           user_id?: string
         }
         Relationships: []
