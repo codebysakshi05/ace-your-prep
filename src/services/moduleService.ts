@@ -12,6 +12,9 @@ export type SaveAttemptInput = {
   prompt?: string | null;
   answer?: string | null;
   feedback?: unknown;
+  difficulty?: "easy" | "medium" | "hard" | null;
+  topic?: string | null;
+  timeSpentMs?: number | null;
 };
 
 export const moduleService = {
@@ -26,6 +29,9 @@ export const moduleService = {
         prompt: input.prompt ?? null,
         answer: input.answer ?? null,
         feedback: (input.feedback as Database["public"]["Tables"]["attempts"]["Insert"]["feedback"]) ?? null,
+        difficulty: input.difficulty ?? null,
+        topic: input.topic ?? null,
+        time_spent_ms: input.timeSpentMs ?? null,
       })
       .select()
       .single();
