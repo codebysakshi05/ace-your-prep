@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import type { FeedbackResult } from "@/services/feedbackService";
-import { Sparkles, AlertCircle, CheckCircle2, Lightbulb, Cpu, Wrench } from "lucide-react";
+import { Sparkles, AlertCircle, CheckCircle2, Lightbulb, Cpu, Wrench, Wand2 } from "lucide-react";
 
 export function FeedbackPanel({ feedback, loading, emptyHint }: { feedback: FeedbackResult | null; loading?: boolean; emptyHint: string }) {
   return (
@@ -29,13 +30,40 @@ export function FeedbackPanel({ feedback, loading, emptyHint }: { feedback: Feed
               </p>
             </div>
 
+            <div className="grid grid-cols-3 gap-3">
+              <Metric label="Grammar" value={feedback.grammar_score} />
+              <Metric label="Clarity" value={feedback.clarity_score} />
+              <Metric label="Confidence" value={feedback.confidence_score} />
+            </div>
+
             <Section icon={CheckCircle2} title="Strengths" tone="accent" items={feedback.strengths} />
             <Section icon={AlertCircle} title="Weaknesses" tone="destructive" items={feedback.weaknesses} />
             <Section icon={Lightbulb} title="Suggestions" tone="primary" items={feedback.suggestions} />
+
+            {feedback.improved_answer && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase mb-2 tracking-wider inline-flex items-center gap-1">
+                  <Wand2 className="w-3 h-3" /> Suggested improved answer
+                </p>
+                <div className="text-sm leading-relaxed p-3 rounded-lg border border-border bg-secondary/40 whitespace-pre-wrap">
+                  {feedback.improved_answer}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-lg border border-border p-3 bg-secondary/30">
+      <p className="text-[11px] uppercase text-muted-foreground tracking-wider">{label}</p>
+      <p className="text-2xl font-bold mt-0.5">{value}</p>
+      <Progress value={value} className="h-1 mt-1.5" />
+    </div>
   );
 }
 

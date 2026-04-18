@@ -1,5 +1,5 @@
 // Shared text-based module (used by GD, Communication, Interview).
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,9 +34,14 @@ export function TextPracticeCard({
   const [text, setText] = useState("");
   const [fb, setFb] = useState<FeedbackResult | null>(null);
   const [busy, setBusy] = useState(false);
+  const [startedAt, setStartedAt] = useState<number>(() => Date.now());
+
+  // Reset timer when prompt changes.
+  useEffect(() => { setStartedAt(Date.now()); setFb(null); setText(""); }, [prompt]);
 
   async function submit() {
     if (!text.trim() || !user) return;
+    const timeSpentMs = Date.now() - startedAt;
     setBusy(true);
     setFb(null);
     try {
@@ -50,6 +55,8 @@ export function TextPracticeCard({
         prompt,
         answer: text,
         feedback: result,
+        topic: module,
+        timeSpentMs,
       });
       toast.success(`Scored ${result.score}/100 · saved to progress`);
     } catch (err) {
