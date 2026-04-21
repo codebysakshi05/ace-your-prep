@@ -66,7 +66,7 @@ export function Home() {
         <div className="absolute top-1/4 -left-20 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[140px] animate-pulse" />
         <div className="absolute bottom-1/4 -right-20 w-[700px] h-[700px] bg-rose-500/10 rounded-full blur-[160px] animate-pulse delay-1000" />
         
-        <div className="max-w-[1400px] w-full mx-auto px-6 md:px-12 grid lg:grid-cols-[1.3fr_0.7fr] gap-10 xl:gap-16 items-center relative z-10 py-20">
+        <div className="max-w-[1400px] w-full mx-auto px-6 md:px-12 grid lg:grid-cols-[1.1fr_0.9fr] gap-12 xl:gap-20 items-center relative z-10 py-20">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -82,9 +82,9 @@ export function Home() {
               <Sparkles className="w-4 h-4" /> The Enterprise Intelligence Platform
             </motion.div>
 
-            <h1 className="text-5xl sm:text-6xl md:text-[4rem] lg:text-[4.5rem] xl:text-[5.5rem] font-[900] leading-[1.05] tracking-tight text-slate-900 dark:text-white flex flex-col items-start relative z-30 drop-shadow-xl pr-4">
+            <h1 className="text-4xl md:text-5xl lg:text-5xl xl:text-7xl font-[900] leading-[1.1] tracking-tight text-slate-900 dark:text-white flex flex-col items-start relative z-30 drop-shadow-xl pr-2">
               <span>Ace Your Placement.</span>
-              <span className="flex flex-wrap lg:flex-nowrap items-center gap-x-3 md:gap-x-4 relative z-30">
+              <span className="flex items-center gap-x-3 relative z-30 w-full overflow-visible whitespace-nowrap">
                 <span className="text-wow italic">Weaponize</span>
                 <span>Intelligence.</span>
               </span>
