@@ -9,6 +9,7 @@ import { databaseService } from '../../services/databaseService';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { supabase } from '../../lib/supabase';
 
 export function Leaderboard() {
   const { user } = useAuth();
@@ -18,8 +19,8 @@ export function Leaderboard() {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    async function loadData() {
-      setLoading(true);
+    async function loadData(showLoader = true) {
+      if (showLoader) setLoading(true);
       try {
         const data = await databaseService.fetchLeaderboard();
         setLeaders(data);
@@ -28,10 +29,32 @@ export function Leaderboard() {
       } catch (err) {
         console.error('Leaderboard load error:', err);
       } finally {
-        setLoading(false);
+        if (showLoader) setLoading(false);
       }
     }
-    loadData();
+    
+    loadData(true);
+
+    // 🚀 INITIALIZE REALTIME WEB-SOCKET SUBSCRIPTION
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles',
+        },
+        () => {
+          console.log("🌐 Realtime Pulse detected on profiles table. Silent refresh initiated.");
+          loadData(false);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const filteredLeaders = leaders.filter(l => 
