@@ -82,13 +82,12 @@ export function Home() {
               <Sparkles className="w-4 h-4" /> The Enterprise Intelligence Platform
             </motion.div>
 
-            <h1 className="text-6xl md:text-[5rem] lg:text-[4.5rem] xl:text-[5.5rem] font-[900] leading-[0.95] tracking-tight text-slate-900 dark:text-white break-words">
-              Ace Your Placement.<br />
-              <span className="text-wow italic pr-2">
-                Weaponize 
+            <h1 className="text-6xl md:text-[5rem] lg:text-[3.7rem] xl:text-[5rem] font-[900] leading-[0.95] tracking-tight text-slate-900 dark:text-white flex flex-col items-start">
+              <span>Ace Your Placement.</span>
+              <span className="whitespace-nowrap">
+                <span className="text-wow italic pr-2">Weaponize</span>
+                Intelligence.
               </span>
-              <br className="hidden lg:block xl:hidden" />
-              Intelligence.
             </h1>
 
             <p className="text-xl text-slate-500 dark:text-slate-400 max-w-xl leading-relaxed font-medium">
