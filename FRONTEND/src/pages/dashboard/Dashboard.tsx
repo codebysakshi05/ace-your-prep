@@ -86,6 +86,7 @@ export function Dashboard() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [topicAnalysis, setTopicAnalysis] = useState<any[]>([]);
   const [showLevelUp, setShowLevelUp] = useState(false);
+  const [mission, setMission] = useState<any>(null);
   const prevLevel = useRef<number | null>(null);
 
   useEffect(() => {
@@ -146,6 +147,10 @@ export function Dashboard() {
                    log.action_type.includes('GD') ? 'text-emerald-400' : 'text-amber-400'
           })));
         }
+
+        // 🎯 AI Mission Engine: Fetch specific targeted recommendation
+        const aiMission = await databaseService.fetchPerformanceInsights(user.id);
+        setMission(aiMission);
       } catch (error: any) {
         console.warn("Dashboard data fetch failed:", error.message);
       } finally {
@@ -356,6 +361,36 @@ export function Dashboard() {
         <div className="lg:col-span-4 space-y-12">
            <AiMentor stats={stats} />
            
+           {/* 🎯 AI TACTICAL MISSION (Recommendation #4) */}
+           {mission && (
+             <motion.div 
+               initial={{ opacity: 0, x: 20 }}
+               animate={{ opacity: 1, x: 0 }}
+               className="glass-premium p-10 bg-indigo-600 dark:bg-indigo-900/40 border-none relative overflow-hidden"
+             >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16" />
+                <div className="relative z-10 space-y-6">
+                   <div className="flex items-center gap-4 text-white/80">
+                      <Sparkles className="w-6 h-6 text-amber-400" />
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em]">Neural Recommendation</p>
+                   </div>
+                   <h3 className="text-3xl font-black text-white leading-tight tracking-tight">
+                      {mission.missionTitle}
+                   </h3>
+                   <p className="text-sm font-medium text-white/70 leading-relaxed">
+                      {mission.recommendation}
+                   </p>
+                   <Link 
+                     to={mission.weakest.route} 
+                     state={{ focusTopic: mission.weakest.id, isMission: true }}
+                     className="flex items-center justify-center gap-3 w-full py-4 bg-white text-indigo-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all shadow-xl"
+                   >
+                      Intercept Weakness <ArrowRight className="w-5 h-5" />
+                   </Link>
+                </div>
+             </motion.div>
+           )}
+
            <div className="glass-card p-12 bg-white/40 dark:bg-white/5">
               <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-10 flex items-center gap-4">
                 <Clock className="w-8 h-8 text-indigo-600" /> Activity Dispatches

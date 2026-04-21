@@ -369,25 +369,41 @@ export const databaseService = {
       const stats = await this.fetchUserStats(user_id);
       
       const modules = [
-        { id: 'aptitude', name: 'Aptitude Practice', score: stats.aptitude, icon: 'Brain' },
-        { id: 'communication', name: 'Comm Practice', score: stats.communication, icon: 'MessageSquare' },
-        { id: 'gd', name: 'GD Simulator', score: stats.gd, icon: 'Users' },
-        { id: 'interview', name: 'Interview Lab', score: stats.interview, icon: 'Video' }
+        { id: 'Quants', name: 'Quantitative Aptitude', score: stats.aptitude, icon: 'Brain', route: '/aptitude' },
+        { id: 'communication', name: 'Communication Practice', score: stats.communication, icon: 'MessageSquare', route: '/communication' },
+        { id: 'gd', name: 'GD Simulator', score: stats.gd, icon: 'Users', route: '/gd-practice' },
+        { id: 'interview', name: 'Interview Lab', score: stats.interview, icon: 'Video', route: '/interview' }
       ];
 
+      // Sort by lowest score
       const sorted = [...modules].sort((a, b) => a.score - b.score);
       const weakest = sorted[0];
 
+      // Logic for personalized mission text
+      let recommendation = '';
+      let missionTitle = '';
+
+      if (weakest.score === 0) {
+        missionTitle = `Initiate ${weakest.name} Assessment`;
+        recommendation = `Target: Establish baseline dominance in ${weakest.name}. Mission critical for profile completion.`;
+      } else if (weakest.score < 60) {
+        missionTitle = `Tactical Remediation: ${weakest.name}`;
+        recommendation = `Intelligence suggests vulnerability in ${weakest.name} (${weakest.score}%). Intercept and upgrade immediately.`;
+      } else {
+        missionTitle = `Refine Elite Performance`;
+        recommendation = `Current status: Elite. Continue high-velocity training in ${weakest.name} to maintain market supremacy.`;
+      }
+
       return {
         weakest,
-        recommendation: weakest.score < 50 
-          ? `Priority: Your ${weakest.name} capability needs improvement. Focused sessions recommended.`
-          : `Next Session: Maintain your competitive edge in ${weakest.name}.`
+        missionTitle,
+        recommendation
       };
     } catch (err) {
       return { 
-        weakest: { id: 'aptitude', name: 'Aptitude Practice', score: 0, icon: 'Brain' },
-        recommendation: 'Start your first training session to get personalised insights.'
+        weakest: { id: 'Quants', name: 'Quantitative Aptitude', score: 0, icon: 'Brain', route: '/aptitude' },
+        missionTitle: 'Initiate Aptitude Session',
+        recommendation: 'Start your first training batch to activate neural performance analysis.'
       };
     }
   },

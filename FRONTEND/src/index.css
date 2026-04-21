@@ -5,6 +5,21 @@
 @tailwind utilities;
 
 :root {
+  /* ── PWA & NATIVE EXPERIENCE (Suggestion #3 Polish) ── */
+@media (max-width: 768px) {
+  html, body {
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .glass-card, .glass-premium {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* ─────────────────────────────────────────────────── */
   /* 🌈 High-Impact SaaS Theme (Vibrant & Liquid) */
   --primary: #6366f1;
   --primary-hover: #4f46e5;

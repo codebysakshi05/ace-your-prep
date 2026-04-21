@@ -53,11 +53,25 @@ export function Aptitude() {
     return () => clearInterval(timer);
   }, [selectedTopic, showResult, timeLeft]);
 
+  useEffect(() => {
+    const focusTopic = location.state?.focusTopic;
+    if (focusTopic && user?.id) {
+      startQuiz(focusTopic);
+    }
+  }, [location.state, user]);
+
   const startQuiz = async (topicId: string) => {
     try {
       setIsLoading(true);
       let targetTopic = topicId;
       
+      // AI Logic: Detect if this is an AI-suggested "Weakness Intercept" mission
+      const isWeaknessIntercept = location.state?.isMission || false;
+      
+      if (isWeaknessIntercept) {
+        toast.success(`Neural Intercept: Targeted training active for ${topicId}`, { icon: '🤖' });
+      }
+
       if (sessionType === 'focus' && user?.id) {
         const insights = await databaseService.fetchPerformanceInsights(user.id);
         if (insights?.weakest?.id) {
