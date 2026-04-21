@@ -1,0 +1,162 @@
+import { TrendingUp, Sparkles, ChevronRight, MessageSquare, AlertTriangle, CheckCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+
+interface AiMentorProps {
+  stats: { title: string; value: number }[];
+}
+
+export function AiMentor({ stats }: AiMentorProps) {
+  const navigate = useNavigate();
+
+  const getGuidance = () => {
+    if (!stats || stats.length === 0) return null;
+
+    const activeStats = stats.filter(s => s.value > 0);
+    const avgScore = activeStats.length
+      ? activeStats.reduce((acc, curr) => acc + curr.value, 0) / activeStats.length
+      : 0;
+
+    const sorted = [...stats].sort((a, b) => a.value - b.value);
+    const weakest = sorted[0];
+    const strongest = sorted[sorted.length - 1];
+
+    if (avgScore === 0) {
+      return {
+        emoji: '👋',
+        heading: "Welcome! Let's get started.",
+        message: "You haven't completed any practice sessions yet. Start with an Aptitude test to set your baseline and unlock personalized recommendations.",
+        tips: [
+          { text: "Start your first Aptitude session", path: '/aptitude' },
+          { text: "Try a Communication prompt", path: '/communication' },
+          { text: "Explore all practice modules", path: '/practice' },
+        ],
+        type: 'start',
+        accent: 'indigo',
+        icon: Sparkles
+      };
+    }
+
+    if (avgScore < 50) {
+      return {
+        emoji: '📌',
+        heading: `Focus on ${weakest.title}`,
+        message: `Your ${weakest.title} score is ${weakest.value}%, which is your weakest area right now. Focus here before moving on to harder content.`,
+        tips: [
+          { text: `Practice ${weakest.title} now`, path: weakest.title === 'Aptitude' ? '/aptitude' : weakest.title === 'GD Skills' ? '/gd-practice' : weakest.title === 'Interviews' ? '/interview' : '/communication' },
+          { text: "Review your past answers", path: '/insights' },
+          { text: "Try an easy warm-up session", path: '/practice' },
+        ],
+        type: 'critical',
+        accent: 'rose',
+        icon: AlertTriangle
+      };
+    }
+
+    if (avgScore < 85) {
+      return {
+        emoji: '📈',
+        heading: `You're progressing well!`,
+        message: `Your ${strongest.title} is your best area at ${strongest.value}%. Push your ${weakest.title} (${weakest.value}%) to reach a balanced, placement-ready profile.`,
+        tips: [
+          { text: `Improve ${weakest.title}`, path: weakest.title === 'Aptitude' ? '/aptitude' : weakest.title === 'GD Skills' ? '/gd-practice' : weakest.title === 'Interviews' ? '/interview' : '/communication' },
+          { text: "Try a full Mock Placement Test", path: '/practice' },
+          { text: "Check your performance insights", path: '/insights' },
+        ],
+        type: 'improving',
+        accent: 'indigo',
+        icon: TrendingUp
+      };
+    }
+
+    return {
+      emoji: '🏆',
+      heading: "You're placement-ready!",
+      message: `Excellent work! Your average score of ${Math.round(avgScore)}% puts you ahead of most candidates. Keep practicing to stay sharp and maintain your edge.`,
+      tips: [
+        { text: "Take a timed Mock Test", path: '/practice' },
+        { text: "Practice Group Discussion", path: '/gd-practice' },
+        { text: "View your full dashboard", path: '/dashboard' },
+      ],
+      type: 'excellent',
+      accent: 'emerald',
+      icon: CheckCircle
+    };
+  };
+
+  const guidance = getGuidance();
+  if (!guidance) return null;
+
+  const accentMap: Record<string, string> = {
+    indigo: 'bg-indigo-50 border-indigo-200 text-indigo-600',
+    rose: 'bg-rose-50 border-rose-200 text-rose-600',
+    emerald: 'bg-emerald-50 border-emerald-200 text-emerald-600',
+  };
+  const accentClasses = accentMap[guidance.accent] || accentMap.indigo;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm relative overflow-hidden"
+    >
+      <div className="absolute -top-10 -right-10 w-40 h-40 bg-indigo-50 rounded-full blur-3xl" />
+
+      <div className="relative z-10 flex items-center gap-4 mb-6">
+        <div className={`p-3 rounded-2xl border ${accentClasses}`}>
+          <guidance.icon className="w-5 h-5" />
+        </div>
+        <div>
+          <h3 className="text-base font-black text-slate-900">Your Coach</h3>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Personalised Guidance</span>
+          </div>
+        </div>
+      </div>
+
+      <div className={`p-5 rounded-2xl border mb-6 ${accentClasses.replace('text-', 'border-').split(' ').slice(0, 2).join(' ')} bg-slate-50`}>
+        <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">{guidance.emoji} {guidance.heading}</p>
+        <p className="text-sm font-medium leading-relaxed text-slate-700">
+          {guidance.message}
+        </p>
+      </div>
+
+      <div className="space-y-3">
+        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+          <Sparkles className="w-3 h-3" /> Suggested Next Steps
+        </h4>
+        {guidance.tips.map((tip, i) => (
+          <motion.button
+            key={i}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.1 }}
+            onClick={() => navigate(tip.path)}
+            className="w-full flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl hover:border-indigo-300 hover:bg-indigo-50 transition-all text-left group"
+          >
+            <div className="w-6 h-6 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0 text-indigo-600 text-xs font-black">
+              {i + 1}
+            </div>
+            <span className="text-xs font-semibold text-slate-700 group-hover:text-slate-900 flex-grow">{tip.text}</span>
+            <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all shrink-0" />
+          </motion.button>
+        ))}
+      </div>
+
+      <div className="mt-6 pt-5 border-t border-slate-100">
+        <button
+          onClick={() => {
+            const event = new CustomEvent('open-chatbot', {
+              detail: { message: `I need help improving my ${stats.find(s => s.value === Math.min(...stats.map(s => s.value)))?.title || 'placement preparation'}. What should I focus on?` }
+            });
+            window.dispatchEvent(event);
+          }}
+          className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95"
+        >
+          <MessageSquare className="w-4 h-4" /> Ask Your AI Coach
+        </button>
+      </div>
+    </motion.div>
+  );
+}
