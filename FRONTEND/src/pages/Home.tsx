@@ -66,12 +66,12 @@ export function Home() {
         <div className="absolute top-1/4 -left-20 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[140px] animate-pulse" />
         <div className="absolute bottom-1/4 -right-20 w-[700px] h-[700px] bg-rose-500/10 rounded-full blur-[160px] animate-pulse delay-1000" />
         
-        <div className="max-w-7xl mx-auto px-6 md:px-12 grid lg:grid-cols-2 gap-16 items-center relative z-10 py-20">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 grid lg:grid-cols-2 gap-10 xl:gap-16 items-center relative z-10 py-20">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1, ease: "circOut" }}
-            className="space-y-12 text-left"
+            className="space-y-10 text-left relative z-20"
           >
             <motion.div 
               initial={{ opacity: 0, scale: 0.8 }}
@@ -82,9 +82,9 @@ export function Home() {
               <Sparkles className="w-4 h-4" /> The Enterprise Intelligence Platform
             </motion.div>
 
-            <h1 className="text-6xl md:text-[5rem] lg:text-[3.7rem] xl:text-[5rem] font-[900] leading-[0.95] tracking-tight text-slate-900 dark:text-white flex flex-col items-start">
+            <h1 className="text-[3.5rem] md:text-[4.5rem] lg:text-[4rem] xl:text-[5rem] font-[900] leading-[1.05] tracking-tight text-slate-900 dark:text-white flex flex-col items-start relative z-30 drop-shadow-xl">
               <span>Ace Your Placement.</span>
-              <span className="whitespace-nowrap">
+              <span className="whitespace-nowrap flex items-center relative z-30">
                 <span className="text-wow italic pr-2">Weaponize</span>
                 Intelligence.
               </span>
