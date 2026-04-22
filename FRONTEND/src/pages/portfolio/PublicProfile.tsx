@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Radar, RadarChart, PolarGrid, PolarAngleAxis, 
-  ResponsiveContainer 
-} from 'recharts';
+import { CustomRadarChart } from '../../components/RadarChart';
 import { 
   Target, Award, ShieldCheck, ArrowRight, 
   Brain, MessageSquare, Users, Video, Share2, 
@@ -119,7 +116,7 @@ export function PublicProfile() {
                     )}
                  </div>
 
-                 <h1 className="text-7xl md:text-9xl font-[900] text-slate-900 dark:text-white leading-[0.8] tracking-tighter uppercase italic">
+                 <h1 className="text-5xl md:text-7xl font-[900] text-slate-900 dark:text-white leading-[0.8] tracking-tighter uppercase italic">
                     {profile.full_name?.split(' ')[0]} <br />
                     <span className="text-wow px-4">{profile.full_name?.split(' ')[1] || 'Operative'}</span>
                  </h1>
@@ -160,21 +157,15 @@ export function PublicProfile() {
                     <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter flex items-center gap-4 mb-12">
                         <Activity className="w-8 h-8 text-indigo-600" /> Neural Matrix
                     </h3>
-                    <div className="h-[350px] w-full">
-                       <ResponsiveContainer width="100%" height="100%">
-                          <RadarChart cx="50%" cy="50%" outerRadius="80%" data={[
-                             { s: 'Logic', v: userStats?.aptitude || 0 },
-                             { s: 'Speech', v: userStats?.communication || 0 },
-                             { s: 'Pulse', v: userStats?.gd || 0 },
-                             { s: 'Stress', v: userStats?.interview || 0 },
-                             { s: 'Social', v: 75 },
-                          ]}>
-                             <PolarGrid stroke="rgba(99, 102, 241, 0.1)" />
-                             <PolarAngleAxis dataKey="s" tick={{ fill: '#64748b', fontSize: 11, fontWeight: '900' }} />
-                             <Radar name="User" dataKey="v" stroke="#6366f1" fill="#6366f1" fillOpacity={0.4} />
-                          </RadarChart>
-                       </ResponsiveContainer>
-                    </div>
+                     <div className="h-[350px] w-full flex items-center justify-center">
+                        <CustomRadarChart data={[
+                           { subject: 'Logic', value: userStats?.aptitude || 0 },
+                           { subject: 'Speech', value: userStats?.communication || 0 },
+                           { subject: 'Pulse', value: userStats?.gd || 0 },
+                           { subject: 'Stress', value: userStats?.interview || 0 },
+                           { subject: 'Social', value: 75 },
+                        ]} primaryKey="value" />
+                     </div>
                  </motion.div>
 
                  {/* Activity Dispatch */}

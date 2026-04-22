@@ -29,9 +29,9 @@ export function MainLayout() {
   return (
     <div className="flex h-screen bg-background overflow-hidden relative">
       {/* Premium Atmospheric Background */}
-      <div className="absolute inset-0 bg-noise z-0 pointer-events-none"></div>
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-300/30 blur-[120px] pointer-events-none mix-blend-multiply"></div>
-      <div className="absolute right-[-5%] bottom-[-5%] w-[35%] h-[35%] rounded-full bg-purple-300/30 blur-[100px] pointer-events-none mix-blend-multiply"></div>
+      <div className="absolute inset-0 bg-noise z-0 pointer-events-none opacity-50"></div>
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/10 blur-[120px] pointer-events-none mix-blend-multiply transition-colors duration-1000"></div>
+      <div className="absolute right-[-5%] bottom-[-5%] w-[35%] h-[35%] rounded-full bg-secondary/10 blur-[100px] pointer-events-none mix-blend-multiply transition-colors duration-1000"></div>
       
       <CommandPalette />
       <AiMentorPanel />
@@ -54,9 +54,9 @@ export function MainLayout() {
         <Sidebar onClose={() => setIsMobileMenuOpen(false)} />
       </div>
 
-      <div className="flex flex-col flex-grow w-full max-w-full overflow-hidden">
+      <div className="flex flex-col flex-grow w-full max-w-full overflow-hidden transition-colors duration-300">
         <Topbar onMenuClick={() => setIsMobileMenuOpen(true)} />
-        <main className="flex-grow overflow-y-auto p-4 md:p-8 custom-scrollbar relative">
+        <main className="flex-grow overflow-y-auto p-4 md:p-8 custom-scrollbar relative bg-background/50">
           <div className="max-w-7xl mx-auto h-full w-full">
             <AnimatePresence mode="wait">
               <PageTransition>

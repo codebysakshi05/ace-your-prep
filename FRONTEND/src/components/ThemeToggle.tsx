@@ -1,14 +1,14 @@
 import { useTheme } from '../contexts/ThemeContext';
-import type { ThemeProtocol } from '../contexts/ThemeContext';
+import type { ThemeMode } from '../contexts/ThemeContext';
 import { Sun, Moon, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 
-  const themes: { id: ThemeProtocol; icon: any; label: string; color: string }[] = [
+  const themes: { id: ThemeMode; icon: any; label: string; color: string }[] = [
     { id: 'phantom-white', icon: Sun, label: 'Light', color: 'text-amber-500' },
-    { id: 'obsidian', icon: Moon, label: 'Obsidian', color: 'text-indigo-400' },
+    { id: 'obsidian', icon: Moon, label: 'Dark', color: 'text-indigo-400' },
     { id: 'cyber-neon', icon: Zap, label: 'Cyber', color: 'text-cyan-400' },
   ];
 
@@ -36,7 +36,7 @@ export function ThemeToggle() {
           )}
 
           <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-2xl">
-            {t.label} Protocol
+            {t.label} Mode
           </div>
         </button>
       ))}

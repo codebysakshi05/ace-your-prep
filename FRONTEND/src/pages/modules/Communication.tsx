@@ -2,59 +2,67 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { 
   MessageSquare, Mic, CheckCircle, Sliders, 
-  Quote, Zap, Activity, Info, Sparkles, RotateCcw, ArrowRight, Trophy, ShieldCheck
+  Quote, Zap, Activity, Info, Sparkles, RotateCcw, ArrowRight, Trophy, ShieldCheck, HelpCircle, Star, Flame
 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, Link } from 'react-router-dom';
-import { getAdaptiveDifficulty } from '../../utils/adaptiveLearning';
+import { getAdaptiveDifficulty, type Difficulty } from '../../utils/adaptiveLearning';
 import { databaseService } from '../../services/databaseService';
+import { fetchSmartQuestions, getDifficultyLabel, calculateXP } from '../../utils/questionEngine';
 import confetti from 'canvas-confetti';
+import { PlacementTips } from '../../components/PlacementTips';
+import { LevelUpBanner, StreakBadge } from '../../components/ProgressionSystem';
+
+const COMM_TOPICS = ['All', 'Extempore', 'Pitch', 'Debate', 'Negotiation'];
 
 export function Communication() {
-  const { user, refreshProfile } = useAuth();
+  const { user, refreshProfile, profile } = useAuth();
   const location = useLocation();
   const sessionType = location.state?.sessionType || null;
+
+  const [selectedTopic, setSelectedTopic] = useState('All');
   const [prompts, setPrompts] = useState<any[]>([]);
   const [selectedPrompt, setSelectedPrompt] = useState<any | null>(null);
+  const [promptIndex, setPromptIndex] = useState(0);
   const [isRatingPhase, setIsRatingPhase] = useState(false);
   const [sessionCompleted, setSessionCompleted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showTips, setShowTips] = useState(false);
+  const [currentDifficulty, setCurrentDifficulty] = useState<Difficulty>('Intermediate');
+  const [prevDifficulty, setPrevDifficulty] = useState<Difficulty>('Intermediate');
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [sessionXP, setSessionXP] = useState(0);
+  const [isReset, setIsReset] = useState(false);
 
   const [fluency, setFluency] = useState(5);
   const [clarity, setClarity] = useState(5);
   const [confidence, setConfidence] = useState(5);
 
   useEffect(() => {
-    const fetchPrompts = async () => {
+    const fetchPrompts = async (topic: string) => {
       setIsLoading(true);
       try {
-        let recommendedDifficulty = await getAdaptiveDifficulty(user?.id || '', 'communication');
-        if (sessionType === 'challenge') recommendedDifficulty = 'Expert';
+        let difficulty = await getAdaptiveDifficulty(user?.id || '', 'communication');
+        const finalDifficulty: Difficulty = sessionType === 'challenge' ? 'Expert' : difficulty;
+        setCurrentDifficulty(finalDifficulty);
+        setPrevDifficulty(finalDifficulty);
 
-        let { data, error } = await supabase
-          .from('module_questions')
-          .select('*')
-          .eq('module_type', 'communication');
-        
-        if (error) throw error;
-        if (!data) data = [];
-
-        const seenIds = await databaseService.fetchSeenQuestionIds(user?.id || '');
-        let pool = data.filter(q => q.difficulty === recommendedDifficulty && !seenIds.includes(q.id));
-        if (pool.length < 3) pool = data.filter(q => !seenIds.includes(q.id));
-        if (pool.length < 2) pool = data;
-
-        setPrompts(pool);
+        const categoryParam = topic === 'All' ? undefined : topic;
+        const result = await fetchSmartQuestions(user?.id || '', 'communication', finalDifficulty, 6, categoryParam);
+        if (result.isReset) {
+          toast('🔄 You\'ve practiced all prompts! A fresh set is ready.', { duration: 4000 });
+        }
+        setIsReset(result.isReset);
+        setPrompts(result.questions);
       } catch (err: any) {
-        console.error("Comm Fetch error:", err);
+        console.error('Comm Fetch error:', err);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchPrompts();
-  }, [user, sessionType]);
+    fetchPrompts(selectedTopic);
+  }, [user, sessionType, selectedTopic]);
 
   useEffect(() => {
     if (sessionType && !selectedPrompt && prompts.length > 0 && !isLoading) {
@@ -69,6 +77,8 @@ export function Communication() {
     setSessionCompleted(true);
     if (user?.id && selectedPrompt) {
       const overall = Math.round(((fluency + clarity + confidence) / 30) * 100);
+      const xp = calculateXP(currentDifficulty, overall);
+      setSessionXP(prev => prev + xp);
       try {
         await databaseService.saveCommunicationScore({
           user_id: user.id,
@@ -79,9 +89,17 @@ export function Communication() {
           overall_score: overall
         });
         if (overall >= 80) confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        await databaseService.markQuestionsAsSeen(user.id, [selectedPrompt.id]);
         await refreshProfile();
         window.dispatchEvent(new CustomEvent('ace-score-updated'));
-        await databaseService.markQuestionsAsSeen(user.id, [selectedPrompt.id]);
+
+        // Check level-up
+        const newDifficulty = await getAdaptiveDifficulty(user.id, 'communication');
+        if (newDifficulty !== currentDifficulty && newDifficulty !== 'Beginner') {
+          setPrevDifficulty(currentDifficulty);
+          setCurrentDifficulty(newDifficulty);
+          setTimeout(() => setShowLevelUp(true), 800);
+        }
       } catch (err) { console.error('Comm score saving failed'); }
     }
   };
@@ -95,11 +113,12 @@ export function Communication() {
     setConfidence(5);
   };
 
-  if (isLoading) return <div className="flex justify-center items-center h-64 text-amber-500 font-black uppercase tracking-[0.5em] animate-pulse">Initializing Speech Node...</div>;
+  if (isLoading) return <div className="flex justify-center items-center h-64 text-amber-500 font-black uppercase tracking-[0.5em] animate-pulse">Loading Communication Session...</div>;
 
   if (sessionCompleted) {
     const overall = Math.round(((fluency + clarity + confidence) / 30) * 100);
     return (
+      <>
       <div className="pb-20 px-6 max-w-4xl mx-auto animate-fade-in flex flex-col items-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -113,12 +132,19 @@ export function Communication() {
           </div>
 
           <h2 className="text-6xl font-black text-slate-900 dark:text-white tracking-tighter mb-4 uppercase leading-none">
-              Speech <span className="text-wow italic px-4">Archived.</span>
+              Session <span className="text-wow italic px-4">Complete!</span>
           </h2>
-          <p className="text-xl text-slate-500 dark:text-slate-400 font-medium mb-12">Articulation metrics synchronized with your cognitive profile.</p>
+          <p className="text-xl text-slate-500 dark:text-slate-400 font-medium mb-4">Your speaking scores have been saved.</p>
+
+          {sessionXP > 0 && (
+            <div className="inline-flex items-center gap-3 px-8 py-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-2xl mb-10">
+              <Zap className="w-5 h-5 text-amber-500 fill-amber-500" />
+              <span className="font-black text-amber-600">+{sessionXP} XP Earned!</span>
+            </div>
+          )}
 
           <div className="bg-amber-600 text-white rounded-[3rem] p-12 mb-12 shadow-2xl shadow-amber-500/30">
-            <p className="text-[10px] font-black text-amber-200 uppercase tracking-widest mb-4">Overall Articulation Index</p>
+            <p className="text-[10px] font-black text-amber-200 uppercase tracking-widest mb-4">Communication Score</p>
             <p className="text-8xl font-black tracking-tighter leading-none">{overall}%</p>
           </div>
 
@@ -137,17 +163,17 @@ export function Communication() {
 
           {overall >= 80 ? (
             <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-[2rem] p-8 mb-12 text-center text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-tight">
-               <ShieldCheck className="w-6 h-6 inline-block mr-3 -mt-1" /> Elite Proficiency. Maintain this narrative momentum.
+               <ShieldCheck className="w-6 h-6 inline-block mr-3 -mt-1" /> Excellent communication! Keep up this level of clarity and confidence.
             </div>
           ) : (
              <div className="bg-amber-500/10 border border-amber-500/20 rounded-[2rem] p-8 mb-12 text-center text-amber-600 dark:text-amber-400 font-bold uppercase tracking-tight">
-               <Activity className="w-6 h-6 inline-block mr-3 -mt-1" /> Consistent daily drills will optimize your articulation DNA.
+               <Activity className="w-6 h-6 inline-block mr-3 -mt-1" /> Keep practicing daily — consistency is the key to strong communication skills.
             </div>
           )}
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <button onClick={resetState} className="btn-wow px-12 py-6 scale-110 flex items-center gap-4">
-              <RotateCcw className="w-5 h-5" /> RE-ENGAGE
+            <button type="button" onClick={resetState} className="btn-wow px-12 py-6 scale-110 flex items-center gap-4">
+              <RotateCcw className="w-5 h-5" /> NEXT PROMPT
             </button>
             <Link to="/practice" className="px-12 py-6 glass border-white/60 dark:border-white/10 text-xs font-black uppercase tracking-widest hover:bg-white dark:text-white transition-all flex items-center gap-4">
               PRACTICE HUB <ArrowRight className="w-5 h-5" />
@@ -155,19 +181,23 @@ export function Communication() {
           </div>
         </motion.div>
       </div>
+      {showLevelUp && (
+        <LevelUpBanner oldDifficulty={prevDifficulty} newDifficulty={currentDifficulty} onDismiss={() => setShowLevelUp(false)} />
+      )}
+    </>
     );
   }
 
   if (selectedPrompt) {
     return (
       <div className="max-w-5xl mx-auto space-y-12 animate-fade-in px-6 pb-20">
-        <button onClick={resetState} className="text-indigo-600 dark:text-indigo-400 text-xs font-black uppercase tracking-widest flex items-center gap-4">
+        <button type="button" onClick={resetState} className="text-indigo-600 dark:text-indigo-400 text-xs font-black uppercase tracking-widest flex items-center gap-4">
           <ArrowRight className="w-5 h-5 rotate-180" /> CLOSE SESSION
         </button>
 
         <motion.div 
           layout
-          className="glass-premium p-16 md:p-24 shadow-2xl relative overflow-hidden bg-white/40 dark:bg-white/5 border-white/60 dark:border-white/10"
+          className="glass-premium p-6 md:p-12 lg:p-24 shadow-2xl relative overflow-hidden bg-white/40 dark:bg-white/5 border-white/60 dark:border-white/10"
         >
           <div className="absolute top-0 right-0 p-16 opacity-5">
              <MessageSquare className="w-80 h-80 text-amber-500" />
@@ -183,9 +213,9 @@ export function Communication() {
             </div>
           </div>
           
-          <div className="p-16 glass bg-slate-950 text-white rounded-[3rem] mb-20 relative z-10 italic">
+          <div className="p-8 md:p-16 glass bg-slate-950 text-white rounded-[2rem] md:rounded-[3rem] mb-20 relative z-10 italic">
             <Quote className="absolute -top-6 -left-6 w-16 h-16 text-white/10" />
-            <p className="text-4xl md:text-5xl font-[900] leading-tight tracking-tight text-center">
+            <p className="text-3xl md:text-5xl lg:text-6xl font-[900] leading-tight tracking-tight text-center">
               "{selectedPrompt.question_text}"
             </p>
           </div>
@@ -201,13 +231,14 @@ export function Communication() {
                     <Mic className="w-6 h-6 text-white" />
                 </div>
               </motion.div>
-              <p className="text-2xl text-slate-500 dark:text-slate-400 text-center mb-16 max-w-xl font-medium italic leading-relaxed">
+              <p className="text-lg md:text-xl lg:text-2xl text-slate-500 dark:text-slate-400 text-center mb-16 max-w-xl font-medium italic leading-relaxed">
                 Execute your narrative. Avoid fillers. Focus on <span className="text-amber-500 font-black">Resonance</span> and <span className="text-indigo-500 font-black">Clarity</span>.
               </p>
               
               <button 
+                type="button"
                 onClick={startRating} 
-                className="btn-wow px-16 py-6 scale-125 flex items-center justify-center gap-4"
+                className="btn-wow px-8 py-4 sm:px-16 sm:py-6 sm:scale-110 flex items-center justify-center gap-4 w-full sm:w-auto"
               >
                 <CheckCircle className="w-6 h-6" /> COMPLETE SIMULATION
               </button>
@@ -231,9 +262,9 @@ export function Communication() {
                     { label: 'Clarity', val: clarity, set: setClarity, color: 'accent-indigo-500' },
                     { label: 'Confidence', val: confidence, set: setConfidence, color: 'accent-rose-500' },
                   ].map((m, i) => (
-                    <div key={i} className="glass bg-white dark:bg-white/5 p-10 rounded-[3rem] border-white/60 dark:border-white/10 flex flex-col items-center">
+                    <div key={i} className="glass bg-white dark:bg-white/5 p-6 md:p-10 rounded-3xl md:rounded-[3rem] border-white/60 dark:border-white/10 flex flex-col items-center">
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-10">{m.label}</p>
-                      <div className="text-6xl font-[900] text-slate-900 dark:text-white mb-10 tabular-nums">
+                      <div className="text-5xl md:text-6xl font-[900] text-slate-900 dark:text-white mb-10 tabular-nums">
                         {m.val}
                       </div>
                       <input 
@@ -250,8 +281,9 @@ export function Communication() {
 
                <div className="flex justify-center pt-10">
                  <button 
+                  type="button"
                   onClick={submitEvaluation} 
-                  className="btn-wow px-20 py-8 scale-125 flex items-center gap-6"
+                  className="btn-wow px-8 py-4 sm:px-20 sm:py-8 sm:scale-110 flex items-center justify-center gap-6 w-full sm:w-auto"
                  >
                     SYNCHRONIZE SESSION <Zap className="w-8 h-8 fill-current" />
                  </button>
@@ -268,14 +300,14 @@ export function Communication() {
       <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} className="flex flex-col md:flex-row justify-between items-end gap-16 border-b border-amber-500/10 pb-20">
         <div className="space-y-6">
           <div className="badge-premium bg-amber-50 text-amber-600 dark:bg-white/5 dark:text-amber-400 inline-block">
-               Neural Simulation Node: Articulation Engine
+               COMMUNICATION TRAINING HUB
           </div>
-          <h1 className="text-7xl md:text-9xl font-[900] text-slate-900 dark:text-white leading-[0.85] tracking-tighter uppercase italic">
-               Sculpt Your <br />
-               <span className="text-wow px-4">Narrative DNA.</span>
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-[900] text-slate-900 dark:text-white leading-[1.1] md:leading-[0.85] tracking-tighter uppercase italic">
+               Refine Your <br />
+               <span className="text-wow px-4">Professional Voice.</span>
           </h1>
-          <p className="text-2xl text-slate-500 dark:text-slate-400 font-medium max-w-2xl leading-relaxed">
-               Introspective speech assessments designed to weaponize your conversational intelligence and conversational poise.
+          <p className="text-lg md:text-xl lg:text-2xl text-slate-500 dark:text-slate-400 font-medium max-w-2xl leading-relaxed">
+               Expert-led speaking assessments designed to enhance your conversational clarity and professional presence.
           </p>
         </div>
         <div className="glass-card p-10 bg-white/40 dark:bg-white/5 border-white/60 dark:border-white/10 hidden md:block">
@@ -289,6 +321,31 @@ export function Communication() {
            </div>
         </div>
       </motion.div>
+
+      <div className="flex justify-center mb-6 px-2">
+        <button 
+          onClick={() => setShowTips(true)}
+          className="flex items-center justify-center gap-3 px-6 py-4 md:px-8 md:py-4 w-full sm:w-auto bg-white dark:bg-white/5 border border-amber-100 dark:border-white/10 rounded-2xl text-amber-600 dark:text-amber-400 font-black text-xs uppercase tracking-widest hover:bg-amber-50 transition-all shadow-xl text-center"
+        >
+          <HelpCircle className="w-5 h-5 flex-shrink-0" /> View Communication Tips & Common Mistakes
+        </button>
+      </div>
+
+      <div className="flex flex-wrap justify-center gap-4 mb-10">
+        {COMM_TOPICS.map(topic => (
+          <button
+            key={topic}
+            onClick={() => setSelectedTopic(topic)}
+            className={`px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all ${
+              selectedTopic === topic
+                ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30'
+                : 'glass bg-white/60 dark:bg-white/5 text-slate-500 hover:text-slate-900 dark:hover:text-white border-transparent'
+            }`}
+          >
+            {topic}
+          </button>
+        ))}
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
         {prompts.map((p, idx) => (
@@ -328,6 +385,7 @@ export function Communication() {
           </div>
         )}
       </div>
+      <PlacementTips category="communication" isOpen={showTips} onClose={() => setShowTips(false)} />
     </div>
   );
 }

@@ -3,11 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Brain, Video, MessageSquare, Users, Zap, Target, 
   Trophy, ChevronRight, Sparkles, Clock, 
-  Activity, TrendingUp, AlertTriangle
+  Activity, TrendingUp, AlertTriangle, FileText, Award,
+  ArrowRight
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { databaseService } from '../../services/databaseService';
+import { AceSessionStart } from '../../components/AceProtocol';
 
 const SESSION_TYPES = [
   {
@@ -53,10 +55,12 @@ const SESSION_TYPES = [
 ];
 
 const MODULE_CARDS = [
-  { id: 'aptitude', name: 'Aptitude', desc: 'Quant, Logical & Verbal', path: '/aptitude', icon: Brain, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-  { id: 'interview', name: 'Interview', desc: 'HR & Technical questions', path: '/interview', icon: Video, color: 'text-rose-600', bg: 'bg-rose-50' },
-  { id: 'communication', name: 'Communication', desc: 'Speaking & fluency practice', path: '/communication', icon: MessageSquare, color: 'text-amber-600', bg: 'bg-amber-50' },
-  { id: 'gd', name: 'Group Discussion', desc: 'Timed topics with scoring', path: '/gd-practice', icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-50' }
+  { id: 'aptitude', name: 'Aptitude Training', desc: 'Quantitative, Logical & Verbal Reasoning', path: '/aptitude', icon: Brain, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+  { id: 'interview', name: 'Interview Preparation', desc: 'HR & Technical interview questions', path: '/interview', icon: Video, color: 'text-rose-600', bg: 'bg-rose-50' },
+  { id: 'communication', name: 'Communication Skills', desc: 'Speaking, fluency & confidence practice', path: '/communication', icon: MessageSquare, color: 'text-amber-600', bg: 'bg-amber-50' },
+  { id: 'email', name: 'Email Writing', desc: 'Professional correspondence & etiquette', path: '/email-writing', icon: FileText, color: 'text-cyan-600', bg: 'bg-cyan-50' },
+  { id: 'gd', name: 'GD Practice', desc: 'Timed discussion topics with scoring', path: '/gd-practice', icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+  { id: 'resume', name: 'Resume Builder', desc: 'Professional resume creation & export', path: '/resume-builder', icon: Award, color: 'text-purple-600', bg: 'bg-purple-50' }
 ];
 
 export function PracticeHub() {
@@ -65,6 +69,8 @@ export function PracticeHub() {
   const [insight, setInsight] = useState<any>(null);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isInitializing, setIsInitializing] = useState(false);
+  const [selectedSession, setSelectedSession] = useState<{ type: string; path: string; name: string } | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -86,9 +92,25 @@ export function PracticeHub() {
   }, [user]);
 
   const handleStartSession = (type: string, moduleId?: string) => {
-    const targetModule = moduleId || insight?.weakest?.id || 'aptitude';
-    const path = targetModule === 'gd' ? '/gd-practice' : `/${targetModule}`;
-    navigate(path, { state: { sessionType: type } });
+    let path = '/aptitude';
+    
+    if (moduleId) {
+      const module = MODULE_CARDS.find(m => m.id === moduleId);
+      path = module ? module.path : `/${moduleId}`;
+    } else if (insight?.weakest?.route) {
+      path = insight.weakest.route;
+    }
+
+    const sessionName = SESSION_TYPES.find(s => s.id === type)?.name || 'Standard';
+    setSelectedSession({ type, path, name: sessionName });
+    setIsInitializing(true);
+  };
+
+  const handleInitializationComplete = () => {
+    if (selectedSession) {
+      navigate(selectedSession.path, { state: { sessionType: selectedSession.type } });
+    }
+    setIsInitializing(false);
   };
 
   const getScoreForModule = (moduleId: string) => {
@@ -98,99 +120,113 @@ export function PracticeHub() {
       interview: stats.interview,
       communication: stats.communication,
       gd: stats.gd,
+      email: stats.communication // Mapping email to communication stats for now
     };
     return map[moduleId] ?? null;
   };
 
+  if (loading) return <div className="flex justify-center items-center h-64 text-indigo-500 font-black animate-pulse uppercase tracking-widest">Loading Practice Environment...</div>;
+
   return (
-    <div className="max-w-[1400px] mx-auto space-y-10 pb-20 animate-fade-in px-4">
+    <div className="max-w-[1700px] mx-auto space-y-16 pb-32 pt-6 px-6 animate-fade-in">
       
       {/* ── Header ── */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-full">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-            <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest">Practice Hub</span>
+      <div className="flex flex-col md:flex-row justify-between items-end gap-16 border-b border-indigo-500/10 pb-20">
+        <div className="space-y-6">
+          <div className="badge-premium bg-primary/10 text-primary border-primary/20 inline-block">
+               PLACEMENT PREPARATION HUB
           </div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight">Start Practicing</h1>
-          <p className="text-slate-500 text-base font-medium max-w-xl">
-            Choose a session type below. Your questions are selected based on your past performance so you always practice the right things.
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-[900] text-slate-900 dark:text-white leading-[1.1] md:leading-[0.85] tracking-tighter uppercase italic">
+               Hone Your <br />
+               <span className="text-wow italic px-2">Placement Edge.</span>
+          </h1>
+          <p className="text-lg md:text-xl lg:text-2xl text-slate-500 dark:text-slate-400 font-medium max-w-2xl leading-relaxed">
+               Expert-designed practice modules to sharpen your technical and professional skills for top-tier recruitment.
           </p>
         </div>
-
-        {/* ── Smart Recommendation Panel ── */}
-        <AnimatePresence>
-          {!loading && insight && (
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className={`rounded-3xl p-6 border-2 flex items-start gap-4 min-w-[280px] max-w-sm relative overflow-hidden transition-all duration-500 hover:scale-[1.02] ${
-                insight.weakest.score < 50 
-                  ? 'bg-rose-50 border-rose-200 glow-rose shadow-xl shadow-rose-500/10' 
-                  : 'bg-indigo-50 border-indigo-200 glow-indigo shadow-xl shadow-indigo-500/10'
-              }`}
-            >
-              <div className="absolute inset-0 shimmer opacity-20 pointer-events-none"></div>
-              <div className={`p-4 rounded-2xl shrink-0 shadow-sm ${insight.weakest.score < 50 ? 'bg-rose-100 text-rose-600' : 'bg-indigo-100 text-indigo-600'}`}>
-                {insight.weakest.score < 50 
-                  ? <AlertTriangle className="w-6 h-6" />
-                  : <TrendingUp className="w-6 h-6" />
-                }
-              </div>
-              <div className="relative z-10">
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">Neural Recommendation</p>
-                <p className="text-sm font-bold text-slate-900 leading-relaxed mb-4">{insight.recommendation}</p>
-                <button
-                  onClick={() => handleStartSession('focus', insight.weakest.id)}
-                  className="px-6 py-2.5 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center gap-2 group animate-shimmer"
-                >
-                  Prioritize Practice <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        
+        <div className="glass-card p-10 bg-white/40 dark:bg-white/5 border-white/60 dark:border-white/10 hidden md:block min-w-[300px] shadow-2xl">
+           <div className="flex justify-between items-center mb-4">
+              <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Placement Readiness</p>
+              <p className="text-2xl font-black text-indigo-600 dark:text-indigo-400">84%</p>
+           </div>
+           <div className="h-2 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+              <motion.div initial={{ width: 0 }} animate={{ width: '84%' }} transition={{ duration: 2, ease: "easeOut" }} className="h-full bg-indigo-600 rounded-full" />
+           </div>
+        </div>
       </div>
 
-      {/* ── Session Types ── */}
+      {/* ── Smart Recommendation Panel ── */}
+      <AnimatePresence>
+        {insight && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`glass-premium p-10 border-2 flex flex-col md:flex-row items-center gap-10 relative overflow-hidden transition-all duration-500 hover:scale-[1.01] ${
+              insight.weakest.score < 50 
+                ? 'bg-rose-50/50 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/20 shadow-rose-500/10' 
+                : 'bg-indigo-50/50 dark:bg-indigo-500/5 border-indigo-200 dark:border-indigo-500/20 shadow-indigo-500/10'
+            } shadow-2xl`}
+          >
+            <div className={`p-8 rounded-[2rem] shrink-0 shadow-2xl ${insight.weakest.score < 50 ? 'bg-rose-600 text-white shadow-rose-500/20' : 'bg-indigo-600 text-white shadow-indigo-500/20'}`}>
+              {insight.weakest.score < 50 
+                ? <AlertTriangle className="w-8 h-8" />
+                : <TrendingUp className="w-8 h-8" />
+              }
+            </div>
+            <div className="relative z-10 flex-grow text-center md:text-left">
+              <p className={`text-[10px] font-black uppercase tracking-[0.4em] mb-3 ${insight.weakest.score < 50 ? 'text-rose-600' : 'text-indigo-600'}`}>Recommended Priority</p>
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2 leading-tight">{insight.missionTitle}</h3>
+              <p className="text-lg font-medium text-slate-500 dark:text-slate-400 mb-8 italic">"{insight.recommendation}"</p>
+              <button
+                onClick={() => handleStartSession('focus')}
+                className="btn-wow px-6 py-4 md:px-10 md:py-5 w-full md:w-auto text-xs font-black uppercase tracking-widest justify-center"
+              >
+                Focus on this area <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="hidden lg:block opacity-5">
+               <Sparkles className="w-40 h-40" />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Session Modes ── */}
       <section>
-        <h2 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-5">Choose a Session Mode</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-10">Select Session Mode</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {SESSION_TYPES.map((session) => (
             <motion.div
               key={session.id}
-              whileHover={{ y: -8 }}
+              whileHover={{ y: -10, scale: 1.02 }}
               onClick={() => handleStartSession(session.id)}
-              className={`bg-white border-2 ${session.border} rounded-[2.5rem] p-8 group cursor-pointer hover:shadow-2xl transition-all relative overflow-hidden flex flex-col justify-between ${
-                session.id === 'quick' ? 'glow-amber-sm' : 
-                session.id === 'challenge' ? 'glow-purple-sm' : 
-                session.id === 'focus' ? 'glow-rose-sm' : 'glow-indigo-sm'
-              }`}
+              className="glass-card bg-white/60 dark:bg-white/5 p-8 md:p-12 flex flex-col justify-between group cursor-pointer border-white/60 dark:border-white/10 shadow-2xl h-full transition-all duration-500"
             >
               <div>
-                <div className="flex justify-between items-start mb-8">
-                  <div className={`p-4 rounded-2xl ${session.bg} ${session.color} shadow-sm group-hover:scale-110 transition-transform`}>
-                    <session.icon className="w-7 h-7" />
+                <div className="flex justify-between items-start mb-12">
+                  <div className={`p-5 rounded-[1.5rem] ${session.bg} ${session.color} shadow-lg shadow-black/5 group-hover:scale-110 transition-transform duration-500`}>
+                    <session.icon className="w-8 h-8" />
                   </div>
-                  <span className="text-[9px] font-black text-slate-500 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl flex items-center gap-1.5 uppercase tracking-widest">
-                    <Clock className="w-3 h-3" /> {session.duration}
+                  <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-white/5 px-4 py-2 rounded-xl border border-slate-100 dark:border-white/10 uppercase tracking-widest">
+                    {session.duration}
                   </span>
                 </div>
-                <h3 className="text-lg font-black text-slate-900 mb-2 uppercase tracking-tight">{session.name}</h3>
-                <p className="text-xs text-slate-400 font-medium leading-relaxed mb-8">{session.desc}</p>
+                <h3 className="text-2xl font-[900] text-slate-900 dark:text-white mb-4 uppercase tracking-tighter group-hover:italic transition-all">{session.name}</h3>
+                <p className="text-base text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-12">{session.desc}</p>
               </div>
-              <div className="flex items-center gap-2 text-[10px] font-black text-indigo-600 uppercase tracking-[0.25em] group-hover:gap-4 transition-all">
-                Initialize <ChevronRight className="w-4 h-4 translate-y-[1px]" />
+              <div className="flex items-center gap-2 text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.3em] group-hover:gap-5 transition-all">
+                Launch Training Session <ChevronRight className="w-5 h-5" />
               </div>
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* ── Module Cards with Scores ── */}
+      {/* ── Training Modules Grid ── */}
       <section>
-        <h2 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-5">Practice by Module</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-10">Specific Training Modules</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {MODULE_CARDS.map((module) => {
             const score = getScoreForModule(module.id);
             const isWeak = insight?.weakest?.id === module.id;
@@ -198,45 +234,60 @@ export function PracticeHub() {
               <Link
                 key={module.id}
                 to={module.path}
-                className={`bg-white border rounded-2xl p-6 group hover:shadow-md transition-all flex items-center justify-between ${
-                  isWeak ? 'border-rose-200 hover:border-rose-300' : 'border-slate-200 hover:border-indigo-300'
+                className={`glass-card p-8 md:p-12 flex flex-col transition-all group hover:-translate-y-4 bg-white/60 dark:bg-white/5 border-white/60 dark:border-white/10 h-full relative overflow-hidden ${
+                  isWeak ? 'ring-2 ring-rose-500 shadow-3xl shadow-rose-500/10' : 'hover:shadow-indigo-500/10'
                 }`}
               >
-                <div className="flex items-center gap-5">
-                  <div className={`w-14 h-14 rounded-2xl ${module.bg} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                    <module.icon className={`w-7 h-7 ${module.color}`} />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <h3 className="text-base font-black text-slate-900">{module.name}</h3>
+                <div className="space-y-10 flex-grow">
+                   <div className="flex justify-between items-center">
+                      <div className={`w-20 h-20 rounded-[2.2rem] ${module.bg} flex items-center justify-center group-hover:rotate-12 transition-all duration-500 shadow-xl`}>
+                        <module.icon className={`w-10 h-10 ${module.color}`} />
+                      </div>
                       {isWeak && (
-                        <span className="text-[9px] font-black text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full uppercase tracking-widest">
-                          Needs Work
-                        </span>
+                        <div className="badge-premium bg-rose-600 text-white shadow-xl shadow-rose-500/30">
+                          PRIORITY
+                        </div>
                       )}
-                    </div>
-                    <p className="text-xs text-slate-500">{module.desc}</p>
-                    {score !== null && (
-                      <div className="mt-2 flex items-center gap-2">
-                        <div className="h-1.5 w-24 bg-slate-100 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all ${score >= 70 ? 'bg-emerald-500' : score >= 50 ? 'bg-amber-500' : 'bg-rose-500'}`}
-                            style={{ width: `${score}%` }}
+                   </div>
+                   
+                   <div>
+                      <h3 className="text-3xl font-[900] text-slate-900 dark:text-white uppercase tracking-tighter mb-3 leading-none group-hover:italic transition-all">{module.name}</h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">{module.desc}</p>
+                   </div>
+
+                   {score !== null && (
+                      <div className="space-y-3 pt-6 border-t border-slate-100 dark:border-white/5">
+                        <div className="flex justify-between items-end">
+                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Skill Level</p>
+                           <p className={`text-xl font-black ${score >= 75 ? 'text-emerald-500' : score >= 50 ? 'text-amber-500' : 'text-rose-500'}`}>{score}%</p>
+                        </div>
+                        <div className="h-2 w-full bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${score}%` }}
+                            transition={{ duration: 1.5, ease: "easeOut" }}
+                            className={`h-full rounded-full ${score >= 75 ? 'bg-emerald-500' : score >= 50 ? 'bg-amber-500' : 'bg-rose-500'}`}
                           />
                         </div>
-                        <span className="text-xs font-bold text-slate-500">Avg: {score}%</span>
                       </div>
-                    )}
-                  </div>
+                   )}
                 </div>
-                <div className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center group-hover:bg-indigo-600 group-hover:border-indigo-600 transition-all text-slate-400 group-hover:text-white shrink-0">
-                  <ChevronRight className="w-5 h-5" />
+                
+                <div className="mt-12 flex items-center justify-between text-xs font-black uppercase tracking-widest text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                   Enter Module <ArrowRight className="w-5 h-5 group-hover:translate-x-3 transition-transform" />
                 </div>
               </Link>
             );
           })}
         </div>
       </section>
+
+      {/* ── Session Loading Overlay ── */}
+      <AceSessionStart 
+        isOpen={isInitializing} 
+        onComplete={handleInitializationComplete} 
+        sessionName={selectedSession?.name || 'Standard'}
+      />
     </div>
   );
 }

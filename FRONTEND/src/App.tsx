@@ -25,6 +25,7 @@ import { Communication } from './pages/modules/Communication';
 import { Interview } from './pages/modules/Interview';
 import { ExecutiveInterview } from './pages/modules/ExecutiveInterview';
 import { MissionRoom } from './pages/modules/MissionRoom';
+import { EmailWriting } from './pages/modules/EmailWriting';
 import { Roadmap } from './pages/roadmap/Roadmap';
 import { Leaderboard } from './pages/leaderboard/Leaderboard';
 import { ResumeBuilder } from './pages/resume/ResumeBuilder';
@@ -82,6 +83,7 @@ function App() {
               <Route path="/aptitude" element={<Aptitude />} />
               <Route path="/gd-practice" element={<GroupDiscussion />} />
               <Route path="/communication" element={<Communication />} />
+              <Route path="/email-writing" element={<EmailWriting />} />
               <Route path="/interview" element={<Interview />} />
               <Route path="/interview-pro" element={<ExecutiveInterview />} />
               <Route path="/roadmap" element={<Roadmap />} />

@@ -1,29 +1,26 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-export type ThemeProtocol = 'obsidian' | 'cyber-neon' | 'phantom-white';
+export type ThemeMode = 'obsidian' | 'cyber-neon' | 'phantom-white';
 
 interface ThemeContextType {
-  theme: ThemeProtocol;
-  setTheme: (theme: ThemeProtocol) => void;
+  theme: ThemeMode;
+  setTheme: (theme: ThemeMode) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeProtocol>(() => {
-    const saved = localStorage.getItem('ace-it-up-protocol');
-    return (saved as ThemeProtocol) || 'phantom-white';
+  const [theme, setThemeState] = useState<ThemeMode>(() => {
+    const saved = localStorage.getItem('ace-theme-mode');
+    return (saved as ThemeMode) || 'phantom-white';
   });
 
   useEffect(() => {
     const root = window.document.documentElement;
-    // Set data-theme for CSS variables
     root.setAttribute('data-theme', theme);
-    // Maintain legacy class support if needed
     root.classList.remove('obsidian', 'cyber-neon', 'phantom-white');
     root.classList.add(theme);
     
-    // Light mode logic for phantom-white
     if (theme === 'phantom-white') {
       root.classList.add('light');
       root.classList.remove('dark');
@@ -32,10 +29,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.classList.remove('light');
     }
 
-    localStorage.setItem('ace-it-up-protocol', theme);
+    localStorage.setItem('ace-theme-mode', theme);
   }, [theme]);
 
-  const setTheme = (newTheme: ThemeProtocol) => {
+  const setTheme = (newTheme: ThemeMode) => {
     setThemeState(newTheme);
   };
 

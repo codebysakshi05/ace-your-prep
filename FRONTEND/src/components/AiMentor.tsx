@@ -98,33 +98,36 @@ export function AiMentor({ stats }: AiMentorProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm relative overflow-hidden"
+      className="glass-premium p-10 relative overflow-hidden bg-white/40 dark:bg-white/5 border-white/60 dark:border-white/10"
     >
-      <div className="absolute -top-10 -right-10 w-40 h-40 bg-indigo-50 rounded-full blur-3xl" />
+      <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
 
-      <div className="relative z-10 flex items-center gap-4 mb-6">
-        <div className={`p-3 rounded-2xl border ${accentClasses}`}>
-          <guidance.icon className="w-5 h-5" />
+      <div className="relative z-10 flex items-center gap-5 mb-8">
+        <div className={`p-4 rounded-2xl border-2 shadow-xl ${accentClasses}`}>
+          <guidance.icon className="w-6 h-6" />
         </div>
         <div>
-          <h3 className="text-base font-black text-slate-900">Your Coach</h3>
+          <h3 className="text-xl font-[900] text-headingText uppercase tracking-tighter">AI Mentor</h3>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Personalised Guidance</span>
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+            <span className="text-[10px] text-mutedText uppercase tracking-[0.2em] font-black">AI Analysis Active</span>
           </div>
         </div>
       </div>
 
-      <div className={`p-5 rounded-2xl border mb-6 ${accentClasses.replace('text-', 'border-').split(' ').slice(0, 2).join(' ')} bg-slate-50`}>
-        <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">{guidance.emoji} {guidance.heading}</p>
-        <p className="text-sm font-medium leading-relaxed text-slate-700">
-          {guidance.message}
+      <div className={`p-8 rounded-[2rem] border-2 mb-8 ${accentClasses.split(' ').slice(1, 2).join(' ')} bg-surface/40 backdrop-blur-md`}>
+        <div className="flex items-center gap-3 mb-4">
+           <span className="text-2xl">{guidance.emoji}</span>
+           <p className="text-[10px] font-black text-mutedText uppercase tracking-[0.4em]">{guidance.heading}</p>
+        </div>
+        <p className="text-base font-medium leading-relaxed text-mainText italic">
+          "{guidance.message}"
         </p>
       </div>
 
-      <div className="space-y-3">
-        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-          <Sparkles className="w-3 h-3" /> Suggested Next Steps
+      <div className="space-y-4">
+        <h4 className="text-[10px] font-black text-mutedText uppercase tracking-[0.4em] flex items-center gap-3 mb-6">
+          <Sparkles className="w-3 h-3 text-amber-500" /> Recommended Steps
         </h4>
         {guidance.tips.map((tip, i) => (
           <motion.button
@@ -133,18 +136,18 @@ export function AiMentor({ stats }: AiMentorProps) {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.1 }}
             onClick={() => navigate(tip.path)}
-            className="w-full flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl hover:border-indigo-300 hover:bg-indigo-50 transition-all text-left group"
+            className="w-full flex items-center gap-5 p-5 bg-surface/30 border-2 border-border rounded-2xl hover:border-primary/50 hover:bg-surface/80 transition-all text-left group"
           >
-            <div className="w-6 h-6 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0 text-indigo-600 text-xs font-black">
+            <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 text-primary text-xs font-black group-hover:scale-110 transition-transform">
               {i + 1}
             </div>
-            <span className="text-xs font-semibold text-slate-700 group-hover:text-slate-900 flex-grow">{tip.text}</span>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all shrink-0" />
+            <span className="text-sm font-bold text-mainText group-hover:text-headingText flex-grow">{tip.text}</span>
+            <ChevronRight className="w-4 h-4 text-mutedText group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
           </motion.button>
         ))}
       </div>
 
-      <div className="mt-6 pt-5 border-t border-slate-100">
+      <div className="mt-10 pt-8 border-t border-border">
         <button
           onClick={() => {
             const event = new CustomEvent('open-chatbot', {
@@ -152,9 +155,9 @@ export function AiMentor({ stats }: AiMentorProps) {
             });
             window.dispatchEvent(event);
           }}
-          className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95"
+          className="btn-wow w-full py-5 justify-center flex items-center gap-4 text-xs font-black uppercase tracking-widest"
         >
-          <MessageSquare className="w-4 h-4" /> Ask Your AI Coach
+          <MessageSquare className="w-5 h-5" /> Ask Your Mentor
         </button>
       </div>
     </motion.div>

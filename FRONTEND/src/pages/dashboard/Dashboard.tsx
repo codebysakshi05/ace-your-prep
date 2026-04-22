@@ -1,15 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
-import { 
-  Brain, Users, MessageSquare, Video, Trophy, Zap,
-  Target, Award, Clock, Activity, ArrowRight
-} from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { 
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  Radar, RadarChart, PolarGrid, PolarAngleAxis, BarChart, Bar
-} from 'recharts';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
+import { ArrowRight, Brain, Users, MessageSquare, Video, Trophy, Zap, Target, Award, Clock, Activity, Sparkles } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { CustomRadarChart } from '../../components/RadarChart';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
+import { databaseService } from '../../services/databaseService';
+import { SkeletonMetrics, SkeletonChart, SkeletonList } from '../../components/ui/SkeletonLoaders';
+import { COMPANY_BENCHMARKS } from '../../constants/benchmarks';
+import { LevelUpOverlay } from '../../components/ui/LevelUpOverlay';
+
 
 function AnimatedCounter({ value, suffix = "" }: { value: number, suffix?: string }) {
   const count = useMotionValue(0);
@@ -61,16 +62,11 @@ function CircularProgress({ value, color }: { value: number, color: string }) {
   );
 }
 
-import { useAuth } from '../../contexts/AuthContext';
-import { supabase } from '../../lib/supabase';
-import { databaseService } from '../../services/databaseService';
-import { AiMentor } from '../../components/AiMentor';
-import { SkeletonMetrics, SkeletonChart, SkeletonList } from '../../components/ui/SkeletonLoaders';
-import { COMPANY_BENCHMARKS } from '../../constants/benchmarks';
-import { LevelUpOverlay } from '../../components/ui/LevelUpOverlay';
+
 
 export function Dashboard() {
   const { user, profile } = useAuth();
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [selectedBenchmark, setSelectedBenchmark] = useState(COMPANY_BENCHMARKS[0]);
   
@@ -148,9 +144,17 @@ export function Dashboard() {
           })));
         }
 
-        // 🎯 AI Mission Engine: Fetch specific targeted recommendation
+        // 🎯 AI Performance Goal: Fetch specific targeted recommendation
         const aiMission = await databaseService.fetchPerformanceInsights(user.id);
         setMission(aiMission);
+        
+        // AI Logic: Detect if this is an AI-suggested training session
+        const isTargetedTraining = (location.state as any)?.isMission || false;
+        const topicId = (location.state as any)?.topic || '';
+        
+        if (isTargetedTraining) {
+          toast.success(`Success Path: Targeted training active for ${topicId}`, { icon: '🎯' });
+        }
       } catch (error: any) {
         console.warn("Dashboard data fetch failed:", error.message);
       } finally {
@@ -219,7 +223,7 @@ export function Dashboard() {
       <motion.div 
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="glass-premium p-12 md:p-20 relative overflow-hidden group bg-hero-liquid dark:bg-slate-950 border-white/40 dark:border-white/5"
+        className="glass-premium p-8 md:p-16 lg:p-20 relative overflow-hidden group bg-hero-liquid dark:bg-slate-950 border-white/40 dark:border-white/5"
       >
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-500/5 rounded-full blur-[160px] -mr-96 -mt-96" />
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-rose-500/5 rounded-full blur-[140px] -ml-96 -mb-96" />
@@ -244,39 +248,39 @@ export function Dashboard() {
                </div>
             </div>
 
-            <h1 className="text-6xl md:text-8xl font-[900] text-slate-900 dark:text-white leading-[0.9] tracking-[ -0.05em]">
-              Dominance Status:<br />
-              <span className="text-wow italic px-2">{profile?.full_name?.split(' ')[0] || "Recruit"}</span>
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-[900] text-headingText leading-[1.1] md:leading-[0.85] tracking-tighter uppercase italic mb-8">
+              Welcome Back, <br />
+              <span className="text-wow italic px-2">{profile?.full_name?.split(' ')[0] || "Student"}</span>
             </h1>
 
-            <p className="text-2xl text-slate-500 dark:text-slate-400 max-w-xl font-medium leading-relaxed">
-              Forensic analysis complete. Your <span className="text-indigo-600 dark:text-indigo-400 italic">Market Probability</span> is currently optimized at <span className="font-black text-slate-900 dark:text-white">{placementProbability}%</span>.
+            <p className="text-lg md:text-xl lg:text-2xl text-mainText max-w-xl font-medium leading-relaxed">
+              Your profile is updated. Your <span className="text-primary italic">Placement Readiness</span> is currently estimated at <span className="font-black text-headingText">{placementProbability}%</span>.
             </p>
 
-            <div className="flex flex-wrap justify-center lg:justify-start gap-6 pt-4">
-              <Link to="/aptitude" className="btn-wow scale-110 shadow-indigo-500/20 px-10 py-5 flex items-center gap-4">
-                <Zap className="w-5 h-5" /> Start Training Dispatches
+            <div className="flex flex-col sm:flex-row flex-wrap justify-center lg:justify-start gap-4 sm:gap-6 pt-4 w-full">
+              <Link to="/aptitude" className="btn-wow w-full sm:w-auto justify-center sm:scale-110 shadow-indigo-500/20 px-6 py-4 md:px-10 md:py-5 flex items-center gap-4">
+                <Zap className="w-5 h-5" /> Start Practice Session
               </Link>
-              <Link to="/leaderboard" className="flex items-center gap-4 px-10 py-5 glass dark:border-white/10 text-xs font-black uppercase tracking-widest hover:bg-white/80 transition-all dark:text-white">
-                <Trophy className="w-5 h-5 text-amber-500" /> Global Standings
+              <Link to="/leaderboard" className="flex items-center justify-center w-full sm:w-auto gap-4 px-6 py-4 md:px-10 md:py-5 glass dark:border-white/10 text-xs font-black uppercase tracking-widest hover:bg-white/80 transition-all dark:text-white">
+                <Trophy className="w-5 h-5 text-amber-500" /> Global Rankings
               </Link>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-8 w-full lg:w-auto">
-             <motion.div whileHover={{ scale: 1.05 }} className="glass-premium p-10 flex flex-col items-center justify-center min-w-[260px] bg-white/40 dark:bg-white/5 border-white/60">
-                <div className="w-20 h-20 bg-indigo-600 rounded-[2rem] mb-6 flex items-center justify-center shadow-2xl shadow-indigo-500/40">
-                  <Award className="w-10 h-10 text-white" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 w-full lg:w-auto">
+             <motion.div whileHover={{ scale: 1.05 }} className="glass-premium p-8 flex flex-col items-center justify-center w-full sm:min-w-[260px] bg-white/40 dark:bg-white/5 border-white/60">
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-indigo-600 rounded-[1.5rem] md:rounded-[2rem] mb-6 flex items-center justify-center shadow-2xl shadow-indigo-500/40">
+                  <Award className="w-8 h-8 md:w-10 md:h-10 text-white" />
                 </div>
-                <p className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">LVL <AnimatedCounter value={profile?.level || 1} /></p>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-3">Tactical Rank</p>
+                <p className="text-4xl md:text-5xl font-black text-headingText tracking-tighter">LVL <AnimatedCounter value={profile?.level || 1} /></p>
+                <p className="text-[10px] font-black text-mutedText uppercase tracking-widest mt-3">Your Level</p>
              </motion.div>
 
-             <motion.div whileHover={{ scale: 1.05 }} className="glass-premium p-10 flex flex-col items-center justify-center min-w-[260px] bg-white/40 dark:bg-white/5 border-white/60">
-                <div className="w-20 h-20 bg-rose-600 rounded-[2rem] mb-6 flex items-center justify-center shadow-2xl shadow-rose-500/40 animate-pulse">
-                  <Activity className="w-10 h-10 text-white" />
+             <motion.div whileHover={{ scale: 1.05 }} className="glass-premium p-8 flex flex-col items-center justify-center w-full sm:min-w-[260px] bg-white/40 dark:bg-white/5 border-white/60">
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-rose-600 rounded-[1.5rem] md:rounded-[2rem] mb-6 flex items-center justify-center shadow-2xl shadow-rose-500/40 animate-pulse">
+                  <Activity className="w-8 h-8 md:w-10 md:h-10 text-white" />
                 </div>
-                <p className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter"><AnimatedCounter value={profile?.streak_count || 0} /> DAYS</p>
+                <p className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tighter"><AnimatedCounter value={profile?.streak_count || 0} /> DAYS</p>
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-3">Active Streak</p>
              </motion.div>
           </div>
@@ -310,26 +314,19 @@ export function Dashboard() {
            <div className="glass-card p-12 bg-white/40 dark:bg-white/5">
               <div className="flex justify-between items-center mb-12">
                 <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter flex items-center gap-4">
-                  <Activity className="w-8 h-8 text-indigo-600" /> Market Intelligence Radar
+                  <Activity className="w-8 h-8 text-indigo-600" /> Skills Performance Radar
                 </h3>
                 <div className="badge-premium dark:bg-white/5 text-indigo-500">Benchmark: {selectedBenchmark.name}</div>
               </div>
-              <div className="h-[450px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
-                    <PolarGrid stroke="rgba(99, 102, 241, 0.1)" />
-                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748B', fontSize: 11, fontWeight: 900 }} />
-                    <Radar dataKey="A" stroke="#6366f1" fill="#6366f1" fillOpacity={0.4} />
-                    <Radar dataKey="B" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.05} strokeDasharray="5 5" />
-                  </RadarChart>
-                </ResponsiveContainer>
+              <div className="h-[450px] w-full flex items-center justify-center">
+                <CustomRadarChart data={radarData} />
               </div>
            </div>
 
            {/* JOB FIT TILES */}
            <div className="glass-card p-12 bg-white/40 dark:bg-white/5">
               <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-12 flex items-center gap-4">
-                <Target className="w-8 h-8 text-rose-500" /> Opportunity Matrix
+                <Target className="w-8 h-8 text-rose-500" /> Target Company Matches
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {jobMatches.map((job) => (
@@ -359,7 +356,6 @@ export function Dashboard() {
         </div>
 
         <div className="lg:col-span-4 space-y-12">
-           <AiMentor stats={stats} />
            
            {/* 🎯 AI TACTICAL MISSION (Recommendation #4) */}
            {mission && (
@@ -372,7 +368,7 @@ export function Dashboard() {
                 <div className="relative z-10 space-y-6">
                    <div className="flex items-center gap-4 text-white/80">
                       <Sparkles className="w-6 h-6 text-amber-400" />
-                      <p className="text-[10px] font-black uppercase tracking-[0.3em]">Neural Recommendation</p>
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em]">Recommended Activity</p>
                    </div>
                    <h3 className="text-3xl font-black text-white leading-tight tracking-tight">
                       {mission.missionTitle}
@@ -385,7 +381,7 @@ export function Dashboard() {
                      state={{ focusTopic: mission.weakest.id, isMission: true }}
                      className="flex items-center justify-center gap-3 w-full py-4 bg-white text-indigo-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all shadow-xl"
                    >
-                      Intercept Weakness <ArrowRight className="w-5 h-5" />
+                      Improve This Area <ArrowRight className="w-5 h-5" />
                    </Link>
                 </div>
              </motion.div>
@@ -393,7 +389,7 @@ export function Dashboard() {
 
            <div className="glass-card p-12 bg-white/40 dark:bg-white/5">
               <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-10 flex items-center gap-4">
-                <Clock className="w-8 h-8 text-indigo-600" /> Activity Dispatches
+                <Clock className="w-8 h-8 text-indigo-600" /> Recent Activity
               </h3>
               <div className="space-y-8">
                 {recentActivities.length > 0 ? recentActivities.map((act, i) => (
@@ -410,13 +406,13 @@ export function Dashboard() {
                 )) : (
                   <div className="flex flex-col items-center justify-center p-8 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl opacity-60">
                     <Zap className="w-8 h-8 text-slate-400 mb-3" />
-                    <p className="text-sm font-black text-slate-500 tracking-widest uppercase">No Active Dispatches</p>
-                    <p className="text-xs font-medium text-slate-400 mt-1">Initiate a practice session to see activity logs.</p>
+                    <p className="text-sm font-black text-slate-500 tracking-widest uppercase">No Recent Activity</p>
+                    <p className="text-xs font-medium text-slate-400 mt-1">Start a practice session to see your progress logs.</p>
                   </div>
                 )}
               </div>
               <Link to="/practice" className="btn-wow w-full mt-12 py-5 justify-center flex items-center gap-4 scale-95 hover:scale-100">
-                Execute Practice Batch <ArrowRight className="w-5 h-5" />
+                Start Practice Session <ArrowRight className="w-5 h-5" />
               </Link>
            </div>
         </div>

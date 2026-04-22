@@ -76,7 +76,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                 to="/dashboard" 
                 className="btn-wow hidden sm:flex items-center gap-3 px-6 py-3 scale-95 hover:scale-100"
               >
-                <LayoutDashboard className="w-4 h-4" /> COMMAND
+                <LayoutDashboard className="w-4 h-4" /> DASHBOARD
               </Link>
             ) : (
               <div className="flex items-center gap-6">
@@ -84,7 +84,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                    <LogIn className="w-4 h-4 text-indigo-600" /> Member Login
                 </Link>
                 <Link to="/register" className="btn-wow px-6 py-3 scale-95 hover:scale-100 hidden sm:flex">
-                   ENLIST
+                   SIGN UP
                 </Link>
               </div>
             )}
@@ -129,7 +129,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                  </span>
               </Link>
               <p className="text-slate-500 text-base leading-relaxed font-medium">
-                Bridging the gap between raw potential and elite enterprise placement via intelligence protocols.
+                Bridging the gap between student potential and professional enterprise placement.
               </p>
               <div className="flex gap-5">
                 {[FaTwitter, FaLinkedin, FaGithub, FaInstagram].map((Icon, i) => (
@@ -141,27 +141,27 @@ export function AppLayout({ children }: AppLayoutProps) {
             </div>
 
             <div className="lg:pl-10">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-12">Intelligence Nodes</h4>
+              <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-12">Training Modules</h4>
               <ul className="space-y-5">
-                <li><Link to="/aptitude" className="text-slate-500 hover:text-white transition-colors text-sm font-bold flex items-center gap-4 group"><Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" /> Aptitude Base</Link></li>
-                <li><Link to="/communication" className="text-slate-500 hover:text-white transition-colors text-sm font-bold flex items-center gap-4 group"><Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" /> Speech Forensics</Link></li>
-                <li><Link to="/interview" className="text-slate-500 hover:text-white transition-colors text-sm font-bold flex items-center gap-4 group"><Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" /> Simulation Hub</Link></li>
+                <li><Link to="/aptitude" className="text-slate-500 hover:text-white transition-colors text-sm font-bold flex items-center gap-4 group"><Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" /> Aptitude Training</Link></li>
+                <li><Link to="/communication" className="text-slate-500 hover:text-white transition-colors text-sm font-bold flex items-center gap-4 group"><Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" /> Communication Skills</Link></li>
+                <li><Link to="/interview" className="text-slate-500 hover:text-white transition-colors text-sm font-bold flex items-center gap-4 group"><Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" /> Interview Preparation</Link></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-12">Nexus Authority</h4>
+              <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-12">Quick Links</h4>
               <ul className="space-y-5">
-                <li><Link to="/leaderboard" className="text-slate-500 hover:text-white transition-colors text-sm font-bold">Global Standings</Link></li>
-                <li><Link to="/recruiter" className="text-slate-500 hover:text-white transition-colors text-sm font-bold">Enterprise Nexus</Link></li>
-                <li><Link to="/portfolio" className="text-slate-500 hover:text-white transition-colors text-sm font-bold">Public DNA</Link></li>
+                <li><Link to="/leaderboard" className="text-slate-500 hover:text-white transition-colors text-sm font-bold">Global Rankings</Link></li>
+                <li><Link to="/recruiter" className="text-slate-500 hover:text-white transition-colors text-sm font-bold">Recruiters</Link></li>
+                <li><Link to="/portfolio" className="text-slate-500 hover:text-white transition-colors text-sm font-bold">Public Portfolio</Link></li>
               </ul>
             </div>
 
             <div>
-               <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-12">Terminal Updates</h4>
+               <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-12">Stay Updated</h4>
                <div className="glass-card p-6 border-white/5 bg-white/5 space-y-6">
-                 <p className="text-[10px] text-slate-500 font-bold leading-relaxed uppercase tracking-widest">Get high-priority node updates & intelligence dispatches.</p>
+                 <p className="text-[10px] text-slate-500 font-bold leading-relaxed uppercase tracking-widest">Get the latest training tips and platform updates.</p>
                  <div className="flex gap-2">
                     <input type="email" placeholder="node@protocol.com" className="bg-slate-900 border-white/5 text-xs w-full py-4" />
                     <button className="p-4 bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all">
@@ -174,7 +174,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           <div className="pt-20 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-10">
             <p className="text-slate-600 text-[10px] font-black uppercase tracking-[0.4em]">
-              © 2026 ACE IT UP PROTOCOL. DOMINATE THE MARKET.
+              © 2026 ACE IT UP. ALL RIGHTS RESERVED.
             </p>
             <div className="flex gap-10">
               <a href="#" className="text-slate-600 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest">Security</a>

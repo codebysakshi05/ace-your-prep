@@ -45,7 +45,7 @@ export function ResumeBuilder() {
       content: resumeData,
       last_updated: new Date().toISOString()
     });
-    if (!error) toast.success("Draft archived in neural cloud!", { icon: '🧠' });
+    if (!error) toast.success("Draft saved to cloud!", { icon: '☁️' });
     setIsSaving(false);
   };
 
@@ -94,7 +94,7 @@ export function ResumeBuilder() {
         achievements: Array.from(new Set([...(prev.achievements || []), ...verifiedAchievements]))
       }));
 
-      toast.success('Performance matrix synchronized!', {
+      toast.success('Performance achievements synchronized!', {
         icon: '🔗',
         style: { background: '#0f172a', color: '#fff', border: '1px solid #4f46e5' }
       });
@@ -110,7 +110,7 @@ export function ResumeBuilder() {
     if (!element) return;
     
     setIsSaving(true);
-    toast.loading('Encoding professional document...', { id: 'pdf-gen' });
+    toast.loading('Generating professional document...', { id: 'pdf-gen' });
     
     try {
       const canvas = await html2canvas(element, { 
@@ -126,7 +126,7 @@ export function ResumeBuilder() {
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`${profile?.full_name || 'My'}_Profile_Architect.pdf`);
+      pdf.save(`${profile?.full_name || 'My'}_Professional_Resume.pdf`);
       toast.success('Document Exported Successfully!', { id: 'pdf-gen', icon: '💎' });
     } catch (err) {
       toast.error('Export error. Please refresh.', { id: 'pdf-gen' });
@@ -168,7 +168,7 @@ export function ResumeBuilder() {
     const tips = [];
     
     if (resumeData.personal.objective.length > 100) score += 15;
-    else tips.push("Expand objective vector.");
+    else tips.push("Expand your career objective.");
 
     if (resumeData.experience.length >= 2) score += 20;
     else tips.push("Add more career milestones.");
@@ -180,7 +180,7 @@ export function ResumeBuilder() {
     if (verbCount < 3) tips.push("Use impact action verbs.");
 
     if (resumeData.achievements?.length > 0) score += 30;
-    else tips.push("Neural Sync achievements.");
+    else tips.push("Sync your platform achievements.");
 
     if (resumeData.personal.phone && resumeData.personal.location) score += 10;
 
@@ -198,21 +198,21 @@ export function ResumeBuilder() {
                 <FileText className="w-10 h-10 text-primary" />
              </div>
              <div>
-                <h1 className="text-5xl font-black text-white tracking-tighter uppercase leading-none">Profile Architect</h1>
-                <p className="text-indigo-400 font-bold text-xs uppercase tracking-[0.4em] mt-2">Verified AI Resume Engine v2.0</p>
+                <h1 className="text-5xl font-black text-white tracking-tighter uppercase leading-none">Resume Builder</h1>
+                <p className="text-indigo-400 font-bold text-xs uppercase tracking-[0.4em] mt-2">Verified Professional Resume Engine v2.0</p>
              </div>
           </div>
           <p className="text-indigo-300/60 text-lg font-medium max-w-2xl">
-            Engineer a high-authority professional document synced with your actual <span className="text-white">Neural Proficiency</span> scores.
+            Build a high-authority professional document synced with your actual <span className="text-white">skill proficiency</span> scores.
           </p>
         </div>
         
         <div className="flex flex-wrap gap-5">
            <button onClick={saveResume} disabled={isSaving} className="px-10 py-5 bg-white/5 hover:bg-white/10 text-white rounded-[1.5rem] border border-white/10 transition-all font-black text-xs uppercase tracking-widest flex items-center gap-4 shadow-2xl active:scale-95">
-             {isSaving ? <RefreshCcw className="w-5 h-5 animate-spin" /> : <ShieldCheck className="w-5 h-5 text-indigo-400" />} {isSaving ? 'Synching...' : 'Neural Archive'}
+             {isSaving ? <RefreshCcw className="w-5 h-5 animate-spin" /> : <ShieldCheck className="w-5 h-5 text-indigo-400" />} {isSaving ? 'Saving...' : 'Save Draft'}
            </button>
            <button onClick={downloadPDF} className="btn-premium px-10 py-5 shadow-indigo-500/40">
-             <Download className="w-5 h-5" /> Export Intelligence
+             <Download className="w-5 h-5" /> Export PDF
            </button>
         </div>
       </div>
@@ -224,10 +224,10 @@ export function ResumeBuilder() {
             <div className="bg-slate-950/40 p-5 rounded-[2.5rem] border border-white/5 backdrop-blur-3xl sticky top-8 z-40 flex flex-col md:flex-row gap-6">
                <div className="flex justify-between items-center flex-grow">
                   {[
-                    { id: 1, icon: User, label: 'Core' },
-                    { id: 2, icon: Briefcase, label: 'History' },
-                    { id: 3, icon: Brain, label: 'Intelligence' },
-                    { id: 4, icon: Layout, label: 'Design' }
+                    { id: 1, icon: User, label: 'Personal' },
+                    { id: 2, icon: Briefcase, label: 'Work History' },
+                    { id: 3, icon: Brain, label: 'Achievements' },
+                    { id: 4, icon: Layout, label: 'Templates' }
                   ].map(node => (
                     <button 
                       key={node.id} 
@@ -260,7 +260,7 @@ export function ResumeBuilder() {
                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-indigo-600/10 border border-indigo-500/20 p-5 rounded-3xl flex items-start gap-4">
                   <Sparkles className="w-5 h-5 text-indigo-400 shrink-0 mt-1" />
                   <div>
-                     <p className="text-[10px] font-black text-white uppercase tracking-widest mb-2">Neural Optimization Tips</p>
+                     <p className="text-[10px] font-black text-white uppercase tracking-widest mb-2">Resume Content Tips</p>
                      <div className="flex flex-wrap gap-x-6 gap-y-2">
                         {optimizationTips.map((tip, i) => (
                            <span key={i} className="text-xs font-medium text-indigo-200/60 flex items-center gap-2">
@@ -281,7 +281,7 @@ export function ResumeBuilder() {
               {step === 1 && (
                 <div className="space-y-10">
                    <div className="flex items-center gap-4 pb-6 border-b border-white/5">
-                      <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Core Identity</h2>
+                      <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Personal Info</h2>
                       <div className="h-px flex-grow bg-white/5"></div>
                    </div>
 
@@ -306,7 +306,7 @@ export function ResumeBuilder() {
                    </div>
 
                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Professional Vector (Objective)</label>
+                      <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Professional Objective</label>
                       <textarea 
                         value={resumeData.personal.objective} 
                         onChange={(e) => setResumeData({...resumeData, personal: {...resumeData.personal, objective: e.target.value}})} 
@@ -320,7 +320,7 @@ export function ResumeBuilder() {
               {step === 2 && (
                 <div className="space-y-10">
                    <div className="flex justify-between items-center gap-10">
-                      <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Experience Node</h2>
+                      <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Work Experience</h2>
                       <div className="flex gap-4">
                          <button onClick={() => addItem('experience')} className="p-4 bg-indigo-600/10 text-primary rounded-2xl hover:bg-primary hover:text-white transition-all border border-indigo-500/10"><Briefcase className="w-5 h-5" /></button>
                          <button onClick={() => addItem('education')} className="p-4 bg-emerald-500/10 text-emerald-400 rounded-2xl hover:bg-emerald-500 hover:text-white transition-all border border-emerald-500/10"><GraduationCap className="w-5 h-5" /></button>
@@ -353,8 +353,8 @@ export function ResumeBuilder() {
                    </div>
                    
                    <div className="max-w-md mx-auto space-y-4">
-                      <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Artificial Sync</h2>
-                      <p className="text-indigo-300/50 font-medium">Inject your verified platform achievements directly into your profile matrices.</p>
+                      <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Achievement Sync</h2>
+                      <p className="text-indigo-300/50 font-medium">Import your verified platform achievements directly into your professional resume.</p>
                    </div>
                    
                    <button 
@@ -363,7 +363,7 @@ export function ResumeBuilder() {
                     className="w-full max-w-lg mx-auto py-7 bg-white text-indigo-600 rounded-[2rem] font-black uppercase tracking-[0.3em] text-xs flex items-center justify-center gap-4 shadow-[0_20px_50px_-10px_rgba(255,255,255,0.2)] hover:-translate-y-1 transition-all active:scale-95 group"
                    >
                      {isSyncing ? <RefreshCcw className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" /> } 
-                     {isSyncing ? 'Accessing Neural Logs...' : 'Synchronize Verified Data'}
+                     {isSyncing ? 'Accessing Data...' : 'Sync Platform Achievements'}
                    </button>
 
                    <div className="space-y-10 pt-10 border-t border-white/5">
@@ -401,7 +401,7 @@ export function ResumeBuilder() {
               
               {step === 4 && (
                 <div className="space-y-10">
-                   <h1 className="text-3xl font-black text-white uppercase tracking-tighter mb-4">Design Protocol</h1>
+                   <h1 className="text-3xl font-black text-white uppercase tracking-tighter mb-4">Choose Template</h1>
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div onClick={() => setTemplate('classic')} className={`cursor-pointer bg-white/5 p-10 rounded-[2.5rem] border transition-all relative group shadow-2xl ${template === 'classic' ? 'border-primary ring-4 ring-primary/10' : 'border-white/10 hover:border-white/30'}`}>
                          {template === 'classic' && <div className="absolute -top-4 -right-4 w-10 h-10 bg-primary rounded-2xl flex items-center justify-center text-white shadow-xl"><CheckCircle className="w-6 h-6" /></div>}
@@ -412,8 +412,8 @@ export function ResumeBuilder() {
                       <div onClick={() => setTemplate('neon')} className={`cursor-pointer bg-slate-950 p-10 rounded-[2.5rem] border transition-all relative group shadow-2xl ${template === 'neon' ? 'border-cyan-400 ring-4 ring-cyan-400/10' : 'border-white/5 hover:border-white/10 opacity-60'}`}>
                          {template === 'neon' && <div className="absolute -top-4 -right-4 w-10 h-10 bg-cyan-400 rounded-2xl flex items-center justify-center text-slate-900 shadow-xl"><CheckCircle className="w-6 h-6" /></div>}
                          <div className="w-16 h-16 bg-cyan-400/10 rounded-2xl flex items-center justify-center text-cyan-400 mb-8"><Zap className="w-8 h-8" /></div>
-                         <h4 className="text-xl font-black text-cyan-400 mb-2 uppercase tracking-tight text-glow">Neon Protocol</h4>
-                         <p className="text-sm text-cyan-400/30 leading-relaxed italic">The future of technical resumes. Striking dark mode layout with custom cyan highlights.</p>
+                         <h4 className="text-xl font-black text-cyan-400 mb-2 uppercase tracking-tight text-glow">Modern Dark</h4>
+                         <p className="text-sm text-cyan-400/30 leading-relaxed italic">A striking dark mode layout with custom cyan highlights for a modern professional look.</p>
                       </div>
                    </div>
                 </div>
@@ -427,7 +427,7 @@ export function ResumeBuilder() {
               <div className="flex items-center justify-between px-3">
                  <div className="flex items-center gap-3">
                     <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-                    <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Hydratable Render Active</span>
+                    <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Live Preview Active</span>
                  </div>
                  <div className="flex gap-2">
                     <button className="p-2.5 bg-white/5 border border-white/10 rounded-xl hover:bg-primary/20 transition-all text-white"><ArrowRight className="w-4 h-4 rotate-180" /></button>

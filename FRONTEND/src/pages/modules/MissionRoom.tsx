@@ -119,15 +119,15 @@ export function MissionRoom() {
                <Zap className="w-12 h-12 text-primary animate-pulse" />
             </div>
             <div className="space-y-4">
-               <h1 className="text-5xl font-black text-white tracking-tighter uppercase">MISSION: BLITZ</h1>
-               <p className="text-indigo-300/40 text-xs font-black uppercase tracking-[0.3em]">Phase 12: Rapid Evolution Protocol</p>
+               <h1 className="text-5xl font-black text-white tracking-tighter uppercase">DAILY BLITZ</h1>
+               <p className="text-indigo-300/40 text-xs font-black uppercase tracking-[0.3em]">Quick Practice Session</p>
             </div>
             <p className="text-lg text-indigo-100/60 font-medium leading-relaxed max-w-2xl mx-auto italic">
               "A high-intensity, multi-vector training cycle. 10 minutes. 4 objectives. No hesitation. Perfect for the professional user on the move."
             </p>
             <div className="flex flex-col items-center gap-6">
                <button onClick={startMission} className="btn-primary px-16 py-6 group">
-                  Initialize Mission <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                  Start Practice <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
                </button>
                <span className="text-[9px] font-black text-white/10 uppercase tracking-widest leading-none">Authorization Required: Level 1+</span>
             </div>
@@ -144,7 +144,7 @@ export function MissionRoom() {
             <div className="flex justify-between items-center text-white">
                <div className="flex items-center gap-4">
                   <Brain className="w-6 h-6 text-indigo-400" />
-                  <span className="text-[10px] font-black uppercase tracking-widest opacity-40 leading-none">Sector I: Structural Logic</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest opacity-40 leading-none">Part I: Logical Reasoning</span>
                </div>
                <div className="text-sm font-black tabular-nums bg-white/5 border border-white/10 px-6 py-2 rounded-xl text-primary">
                   {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
@@ -188,7 +188,7 @@ export function MissionRoom() {
             <div className="flex justify-between items-center text-white">
                <div className="flex items-center gap-4">
                   <Video className="w-6 h-6 text-rose-500" />
-                  <span className="text-[10px] font-black uppercase tracking-widest opacity-40 leading-none">Sector II: Articulation Pulse</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest opacity-40 leading-none">Part II: Interview Speaking</span>
                </div>
                <div className="text-sm font-black tabular-nums bg-white/5 border border-white/10 px-6 py-2 rounded-xl text-rose-500">
                   {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
@@ -208,7 +208,7 @@ export function MissionRoom() {
                />
                <div className="flex justify-end">
                   <button onClick={submitInterview} className="btn-primary bg-rose-500 border-rose-600 px-12 py-5 shadow-rose-500/20">
-                     Complete Mission
+                     Finish Session
                   </button>
                </div>
             </div>
@@ -226,24 +226,24 @@ export function MissionRoom() {
                <Trophy className="w-12 h-12 text-emerald-400" />
             </div>
             <div className="space-y-2">
-               <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Neural Link Synchronized</p>
-               <h2 className="text-5xl font-black text-white uppercase tracking-tighter leading-none">Debriefing Complete</h2>
+               <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Session Complete</p>
+               <h2 className="text-5xl font-black text-white uppercase tracking-tighter leading-none">Practice Results</h2>
             </div>
             
             <div className="grid grid-cols-2 gap-8 max-w-xl mx-auto">
                <div className="bg-slate-950/40 p-8 rounded-3xl border border-white/5">
-                  <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2">Logic Pulse</p>
+                  <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2">Logical Score</p>
                   <p className="text-4xl font-black text-white">{aptScore}/3</p>
                </div>
                <div className="bg-slate-950/40 p-8 rounded-3xl border border-white/5">
-                  <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-2">Vocal Precision</p>
+                  <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-2">Interview Score</p>
                   <p className="text-4xl font-black text-white">{interviewResult?.score}%</p>
                </div>
             </div>
 
             <div className="flex flex-col md:flex-row items-center justify-center gap-6 pt-8 border-t border-white/5">
                <button onClick={() => setPhase('briefing')} className="px-12 py-5 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all">
-                  Run Sequence Again
+                  Start New Session
                </button>
                <button onClick={() => navigate('/dashboard')} className="btn-primary px-12 py-5">
                   Return to Dashboard
@@ -262,14 +262,14 @@ export function MissionRoom() {
                     <Activity className="w-4 h-4" />
                  </div>
                  <div>
-                    <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest leading-none">Neural Link</p>
-                    <p className="text-xs font-black text-white uppercase leading-none mt-1">Status: Stable</p>
+                    <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest leading-none">Progress</p>
+                    <p className="text-xs font-black text-white uppercase leading-none mt-1">Status: Active</p>
                  </div>
               </div>
               <div className="flex items-center gap-3">
                  <div className="h-6 w-px bg-white/10"></div>
                  <div className="text-right">
-                    <p className="text-[9px] font-black text-white/20 uppercase tracking-widest leading-none">Growth Pulse</p>
+                    <p className="text-[9px] font-black text-white/20 uppercase tracking-widest leading-none">Growth Tracker</p>
                     <p className="text-xs font-black text-primary uppercase leading-none mt-1">+120 XP Est.</p>
                  </div>
               </div>

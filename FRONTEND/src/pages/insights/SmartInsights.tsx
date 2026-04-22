@@ -1,14 +1,56 @@
 import { useState, useEffect } from 'react';
-import { 
-  BarChart2, ArrowUpRight, Sparkles,
-  Activity, Star
-} from 'lucide-react';
-import { 
-  XAxis, YAxis, CartesianGrid, 
-  Tooltip, ResponsiveContainer, AreaChart, Area,
-  Radar, RadarChart, 
-  PolarGrid, PolarAngleAxis, PolarRadiusAxis
-} from 'recharts';
+import { BarChart2, ArrowUpRight, Sparkles, Activity, Star } from 'lucide-react';
+import { CustomRadarChart } from '../../components/RadarChart';
+
+// 🛡️ STABILITY PIVOT: Custom SVG Area Chart
+const CustomAreaChart = ({ data }: { data: any[] }) => {
+  const size = { w: 600, h: 300 };
+  const padding = 40;
+  if (!data?.length) return <div className="h-full w-full flex items-center justify-center text-slate-500">No trajectory data</div>;
+  
+  const maxVal = 100;
+  const xStep = (size.w - padding * 2) / (data.length - 1 || 1);
+  const getPoints = () => data.map((d, i) => ({
+    x: padding + i * xStep,
+    y: size.h - padding - (d.score / maxVal) * (size.h - padding * 2)
+  }));
+  
+  const points = getPoints();
+  const pathData = `M ${points[0].x} ${points[0].y} ` + points.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ');
+  const areaData = pathData + ` L ${points[points.length-1].x} ${size.h - padding} L ${points[0].x} ${size.h - padding} Z`;
+
+  return (
+    <svg width="100%" height="100%" viewBox={`0 0 ${size.w} ${size.h}`} className="overflow-visible">
+      <defs>
+        <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
+          <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+        </linearGradient>
+      </defs>
+      {/* Grid Lines */}
+      {[0, 25, 50, 75, 100].map(v => {
+        const y = size.h - padding - (v / maxVal) * (size.h - padding * 2);
+        return <line key={v} x1={padding} y1={y} x2={size.w - padding} y2={y} className="stroke-white/5 stroke-1" />;
+      })}
+      {/* The Area */}
+      <motion.path 
+        initial={{ opacity: 0 }} 
+        animate={{ opacity: 1 }} 
+        d={areaData} 
+        fill="url(#areaGradient)" 
+      />
+      {/* The Line */}
+      <motion.path 
+        initial={{ pathLength: 0 }} 
+        animate={{ pathLength: 1 }} 
+        transition={{ duration: 1.5 }}
+        d={pathData} 
+        className="fill-none stroke-indigo-500 stroke-[3]" 
+      />
+    </svg>
+  );
+};
+
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { motion } from 'framer-motion';
@@ -117,30 +159,9 @@ export function SmartInsights() {
            <h2 className="text-2xl font-black text-white mb-2 uppercase tracking-tight">Full-Stack Mastery</h2>
            <p className="text-indigo-300/50 text-xs font-bold uppercase tracking-widest mb-12">Composite Skill Vector</p>
            
-           <div className="h-[350px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={stats.mastery}>
-                      <PolarGrid stroke="rgba(255,255,255,0.1)" />
-                      <PolarAngleAxis dataKey="subject" tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 10, fontWeight: 900 }} />
-                      <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                      <Radar
-                        name="Student"
-                        dataKey="value"
-                        stroke="#6366f1"
-                        fill="#6366f1"
-                        fillOpacity={0.5}
-                      />
-                      <Radar
-                        name="Benchmark"
-                        dataKey="benchmark"
-                        stroke="#10b981"
-                        fill="#10b981"
-                        fillOpacity={0.1}
-                        strokeDasharray="4 4"
-                      />
-                  </RadarChart>
-              </ResponsiveContainer>
-           </div>
+            <div className="h-[350px] w-full flex items-center justify-center">
+               <CustomRadarChart data={stats.mastery} primaryKey="value" secondaryKey="benchmark" />
+            </div>
 
            <div className="grid grid-cols-2 gap-4 mt-8">
               <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
@@ -166,26 +187,9 @@ export function SmartInsights() {
               <Activity className="w-4 h-4" /> Historical Learning Momentum
            </p>
 
-           <div className="h-[350px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={stats.trends}>
-                      <defs>
-                        <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 700 }} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 700 }} domain={[0, 100]} />
-                      <Tooltip 
-                        contentStyle={{ backgroundColor: '#020617', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '1rem' }}
-                        itemStyle={{ color: '#fff', fontWeight: 900 }}
-                      />
-                      <Area type="monotone" dataKey="score" stroke="#6366f1" strokeWidth={4} fillOpacity={1} fill="url(#colorScore)" />
-                  </AreaChart>
-              </ResponsiveContainer>
-           </div>
+           <div className="h-[350px] w-full pt-8">
+               <CustomAreaChart data={stats.trends} />
+            </div>
 
            <div className="absolute bottom-10 right-10 flex gap-4">
               <div className="text-right">

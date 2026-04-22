@@ -17,12 +17,12 @@ interface RoadmapNode {
 }
 
 const ROADMAP_NODES: RoadmapNode[] = [
-  { id: 1, title: 'The Apprentice', desc: 'Initialize your placement profile and complete first aptitude sync.', requirement: 'Complete 1 Aptitude Test', minLevel: 1, icon: Star, type: 'core' },
+  { id: 1, title: 'The Apprentice', desc: 'Set up your profile and complete your first aptitude test.', requirement: 'Complete 1 Aptitude Test', minLevel: 1, icon: Star, type: 'core' },
   { id: 2, title: 'Logical Navigator', desc: 'Master the fundamentals of reasoning and pattern recognition.', requirement: 'Score > 60% in Logic', minLevel: 2, icon: Brain, type: 'core' },
-  { id: 3, title: 'Articulation Node', desc: 'Break the silence. Practice your first 5 speech articulation prompts.', requirement: 'XP > 1000', minLevel: 3, icon: Zap, type: 'milestone' },
-  { id: 4, title: 'Candidate Tier', desc: 'Establish a balanced professional baseline across all training sectors.', requirement: 'All scores > 50%', minLevel: 4, icon: Target, type: 'core' },
-  { id: 5, title: 'Expert Sector', desc: 'Unlock high-difficulty challenges and advanced interview forensics.', requirement: 'Level 6 Reach', minLevel: 6, icon: Shield, type: 'core' },
-  { id: 6, title: 'Placement Legend', desc: 'The final threshold. High-authority status for elite company screenings.', requirement: 'Total XP > 5000', minLevel: 10, icon: Rocket, type: 'legend' },
+  { id: 3, title: 'Communication Hub', desc: 'Break the silence. Complete your first 5 speaking prompts.', requirement: 'XP > 1000', minLevel: 3, icon: Zap, type: 'milestone' },
+  { id: 4, title: 'Candidate Tier', desc: 'Establish a balanced professional baseline across all training modules.', requirement: 'All scores > 50%', minLevel: 4, icon: Target, type: 'core' },
+  { id: 5, title: 'Expert Zone', desc: 'Unlock high-difficulty challenges and advanced interview preparation.', requirement: 'Level 6 Reach', minLevel: 6, icon: Shield, type: 'core' },
+  { id: 6, title: 'Placement Legend', desc: 'The final threshold. Reach top-tier status for elite company screenings.', requirement: 'Total XP > 5000', minLevel: 10, icon: Rocket, type: 'legend' },
 ];
 
 export function Roadmap() {
@@ -42,11 +42,11 @@ export function Roadmap() {
   return (
     <div className="max-w-4xl mx-auto animate-fade-in space-y-12 pb-20 px-4">
       <div className="text-center space-y-4">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-xs font-bold uppercase tracking-widest">
-          <Trophy className="w-3.5 h-3.5" /> Career Intelligence Path
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest">
+          <Trophy className="w-3.5 h-3.5" /> Career Success Path
         </div>
-        <h1 className="text-5xl font-black text-slate-900 tracking-tighter">Your <span className="text-indigo-600">Roadmap.</span></h1>
-        <p className="text-slate-500 text-lg font-medium max-w-xl mx-auto">Track your progression from an Apprentice to a Placement Legend through data-driven milestones.</p>
+        <h1 className="text-5xl font-black text-headingText tracking-tighter">Your <span className="text-primary">Roadmap.</span></h1>
+        <p className="text-mutedText text-lg font-medium max-w-xl mx-auto">Track your progression from an Apprentice to a Placement Legend through clear milestones.</p>
       </div>
 
       <div className="relative mt-20">
@@ -102,7 +102,7 @@ export function Roadmap() {
                             ${isCompleted ? 'text-emerald-600 bg-emerald-50' : 
                               isLocked ? 'text-slate-400 bg-slate-100' : 'text-indigo-600 bg-indigo-50 animate-pulse'}`}
                            >
-                             {isCompleted ? 'Node Synchronized' : isLocked ? `Locked: LVL ${node.minLevel}` : 'Current Objective'}
+                             {isCompleted ? 'Milestone Completed' : isLocked ? `Locked: LVL ${node.minLevel}` : 'Current Objective'}
                            </span>
                            {isCompleted && <CheckCircle className="w-5 h-5 text-emerald-500" />}
                         </div>
@@ -115,8 +115,8 @@ export function Roadmap() {
                               <Target className="w-3.5 h-3.5" /> {node.requirement}
                            </div>
                            {!isLocked && !isCompleted && (
-                              <button className="text-xs font-black text-indigo-600 flex items-center gap-2 group/btn">
-                                 Accelerate Sync <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-all" />
+                              <button className="text-xs font-black text-primary flex items-center gap-2 group/btn">
+                                 Start Milestone <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-all" />
                               </button>
                            )}
                         </div>
@@ -133,7 +133,7 @@ export function Roadmap() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-12">
          {[
            { label: 'Current Phase', value: ROADMAP_NODES[activeNode - 1]?.title || 'Finalizing', icon: Star, color: 'text-indigo-600' },
-           { label: 'Total Sync Points', value: `${profile?.xp || 0} XP`, icon: Zap, color: 'text-amber-500' },
+           { label: 'Total Points', value: `${profile?.xp || 0} XP`, icon: Zap, color: 'text-amber-500' },
            { label: 'Rank Status', value: (profile?.level || 1) >= 10 ? 'Placement Legend' : 'Candidate', icon: Trophy, color: 'text-emerald-500' }
          ].map((stat) => (
             <div key={stat.label} className="bg-white border border-slate-200 p-8 rounded-[2rem] shadow-sm">

@@ -7,18 +7,23 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        heading: ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+      },
       colors: {
-        background: 'var(--background)',
-        surface: 'var(--surface)',
+        background: 'var(--color-bg)',
+        surface: 'var(--color-surface)',
         primary: {
-          DEFAULT: 'var(--primary)',
-          hover: 'var(--primary-hover)',
+          DEFAULT: 'var(--color-primary)',
+          hover: 'var(--color-primary-dark)',
         },
-        secondary: 'var(--secondary)',
-        accent: 'var(--accent)',
-        border: 'var(--border)',
-        mainText: 'var(--text-main)',
-        mutedText: 'var(--text-muted)',
+        secondary: 'var(--color-secondary)',
+        accent: 'var(--color-accent)',
+        border: 'var(--color-border)',
+        mainText: 'var(--color-text-body)',
+        headingText: 'var(--color-text-heading)',
+        mutedText: 'var(--color-text-muted)',
       },
       borderRadius: {
         'xl': '1rem',

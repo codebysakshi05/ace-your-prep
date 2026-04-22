@@ -114,7 +114,7 @@ export const databaseService = {
 
     const { data, error } = await supabase
       .from(table)
-      .select(`${topicField}, ${scoreField}`)
+      .select('*')
       .eq('user_id', user_id);
 
     if (error) throw error;
@@ -125,7 +125,8 @@ export const databaseService = {
     data.forEach((row: any) => {
       const topic = row[topicField];
       if (!grouped[topic]) grouped[topic] = { total: 0, count: 0 };
-      grouped[topic].total += row[scoreField];
+      const val = row.evaluation_score !== undefined ? row.evaluation_score : (row.score !== undefined ? row.score : 0);
+      grouped[topic].total += val;
       grouped[topic].count += 1;
     });
 
@@ -290,30 +291,44 @@ export const databaseService = {
 
   async fetchUserStats(user_id: string) {
     try {
-      const [aptRes, commRes, gdRes, intRes] = await Promise.all([
-        supabase.from('aptitude_scores').select('score').eq('user_id', user_id),
-        supabase.from('communication_scores').select('overall_score').eq('user_id', user_id),
-        supabase.from('gd_sessions').select('score').eq('user_id', user_id),
-        supabase.from('interview_scores').select('evaluation_score').eq('user_id', user_id),
+      const fetchSafely = async (table: string) => {
+        try {
+          const { data, error } = await supabase.from(table).select('*').eq('user_id', user_id);
+          if (error) {
+            console.warn(`[fetchUserStats] Error fetching ${table}:`, error.message);
+            return [];
+          }
+          return data || [];
+        } catch (e) {
+          console.warn(`[fetchUserStats] Exception fetching ${table}:`, e);
+          return [];
+        }
+      };
+
+      const [aptData, commData, gdData, intData] = await Promise.all([
+        fetchSafely('aptitude_scores'),
+        fetchSafely('communication_scores'),
+        fetchSafely('gd_sessions'),
+        fetchSafely('interview_scores'),
       ]);
 
-      const calculateAvg = (data: any[], key: string) =>
-        data?.length ? Math.round(data.reduce((a, c) => a + (c[key] || 0), 0) / data.length) : 0;
+      const calculateAvg = (data: any[], key: string, fallbackKey = 'score') =>
+        data?.length ? Math.round(data.reduce((a, c) => a + (c[key] ?? c[fallbackKey] ?? 0), 0) / data.length) : 0;
 
-      // GD score: average of actual self-rated scores (not count * 15)
-      const gdScores = (gdRes.data || []).filter(s => s.score > 0);
+      // GD score calculation
+      const gdScores = (gdData || []).filter((s: any) => s.score > 0);
       const gdAvg = gdScores.length
         ? Math.round(gdScores.reduce((a, c) => a + (c.score || 0), 0) / gdScores.length)
         : 0;
 
       return {
-        aptitude: calculateAvg(aptRes.data || [], 'score'),
-        communication: calculateAvg(commRes.data || [], 'overall_score'),
+        aptitude: calculateAvg(aptData, 'score'),
+        communication: calculateAvg(commData, 'overall_score'),
         gd: gdAvg,
-        interview: calculateAvg(intRes.data || [], 'evaluation_score'),
+        interview: calculateAvg(intData, 'evaluation_score', 'score'),
       };
     } catch (err) {
-      console.warn('[fetchUserStats] Failed:', err);
+      console.warn('[fetchUserStats] Global failure:', err);
       return { aptitude: 0, communication: 0, gd: 0, interview: 0 };
     }
   },
@@ -384,14 +399,14 @@ export const databaseService = {
       let missionTitle = '';
 
       if (weakest.score === 0) {
-        missionTitle = `Initiate ${weakest.name} Assessment`;
-        recommendation = `Target: Establish baseline dominance in ${weakest.name}. Mission critical for profile completion.`;
+        missionTitle = `Start ${weakest.name} Training`;
+        recommendation = `Target: Complete your first ${weakest.name} session to establish your starting level.`;
       } else if (weakest.score < 60) {
-        missionTitle = `Tactical Remediation: ${weakest.name}`;
-        recommendation = `Intelligence suggests vulnerability in ${weakest.name} (${weakest.score}%). Intercept and upgrade immediately.`;
+        missionTitle = `Improvement: ${weakest.name}`;
+        recommendation = `Your current score in ${weakest.name} is ${weakest.score}%. Practice this area to improve your placement readiness.`;
       } else {
-        missionTitle = `Refine Elite Performance`;
-        recommendation = `Current status: Elite. Continue high-velocity training in ${weakest.name} to maintain market supremacy.`;
+        missionTitle = `Refine Your Skills`;
+        recommendation = `Current status: Excellent. Continue practicing ${weakest.name} to maintain your competitive edge.`;
       }
 
       return {
@@ -402,8 +417,8 @@ export const databaseService = {
     } catch (err) {
       return { 
         weakest: { id: 'Quants', name: 'Quantitative Aptitude', score: 0, icon: 'Brain', route: '/aptitude' },
-        missionTitle: 'Initiate Aptitude Session',
-        recommendation: 'Start your first training batch to activate neural performance analysis.'
+        missionTitle: 'Start Practice Session',
+        recommendation: 'Complete your first training session to see your performance analysis.'
       };
     }
   },
